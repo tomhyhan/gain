@@ -95,6 +95,7 @@ class App {
   box-shadow: 0 var(--border-width) 0px 0px #3b3b3b;
   background-color: var(--button-color);
   color: white;
+  font-weight: bold;
 }
 
 .form-btn:hover {
@@ -114,8 +115,9 @@ class App {
 
 .form-btn:disabled {
   cursor: not-allowed;
-  filter: none;
-  transform: none;
+  border-color: var(--inactive);
+  color:var(--inactive);
+  background-color: #f5f5f5;
 }
 
 .form-btn:active {
@@ -409,7 +411,7 @@ class FormTrigger extends BaseComponent {
     super(`<section class="formTrigger">
       <h3 class="formTrigger__header">Hello Conversion!</h3>
       <p class="formTrigger__p">Click on the button below to contact us</p>
-      <button class="form-btn formTrigger__btn" disabled>Click here</button>
+      <button class="form-btn formTrigger__btn">Click here</button>
     </section>`)
   }
 }
@@ -473,8 +475,8 @@ class Modal extends BaseComponent {
       
           <div class="form-step" data-step="2">
             <div class="inputbox-group">
-              <label for="help">How can we help you?</label>
-              <textarea id="help" name="help" rows="4" placeholder="Tell us more about how we can help"></textarea>
+              <label for="help">How can we help you?<span class="inputbox-group__star">*</span></label>
+              <textarea id="help" name="help" rows="4" placeholder="Tell us more about how we can help" required></textarea>
             </div>
             <div class="checkbox-group">
               <input type="checkbox" id="updates" name="updates">
@@ -566,7 +568,6 @@ class Modal extends BaseComponent {
     for (const input of inputs) {
       if (!input.checkValidity()) {
         allValid = false;
-        console.warn(`Validation failed for: ${input.name}`);
         alert(`Please fill out all required fields.\n'${input.labels[0].innerText}' is required.`);
         input.focus();
         break; 
