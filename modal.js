@@ -10,21 +10,27 @@ class App {
     app.page = new PageComponent();
     app.page.attachTo(app.root);
 
-    // attach form trigger 
+    // add form trigger to page 
     const formTrigger = new FormTrigger()
     app.page.addChild(formTrigger)
   }
 }
 
-class PageComponent {
-  constructor() {
+class BaseComponent {
+  constructor(innerHTML) {
     const template = document.createElement("template");
-    template.innerHTML = "<div class='page-section'></div>";
+    template.innerHTML = innerHTML;
     this.element = template.content.firstElementChild;
   }
 
   attachTo = (parent, position="afterbegin") => {
     parent.insertAdjacentElement(position, this.element);
+  }
+}
+
+class PageComponent extends BaseComponent {
+  constructor() {
+    super("<div class='page-section'></div>");
   }
 
   addChild = (child) => {
@@ -32,20 +38,13 @@ class PageComponent {
   }
 }
 
-class FormTrigger {
+class FormTrigger extends BaseComponent {
   constructor() {
-    const template = document.createElement("template")
-    template.innerHTML = `
-    <section>
+    super(`<section>
       <h1>Hello Conversion!</h1>
       <p>Click on the button below to contact us</p>
       <button>click here</button>
-    </section>`
-    this.element = template.content.firstElementChild
-  }
-
-  attachTo = (parent, position="afterbegin") => {
-    parent.insertAdjacentElement(position, this.element);
+    </section>`)
   }
 }
 
