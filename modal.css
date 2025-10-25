@@ -1,7 +1,20 @@
 /* From Trigger */
-.formTrigger {
-  padding: 1rem;
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.3);
+  z-index: 10000; /* header is 9999 */
 
+}
+
+.formTrigger {
+  padding: 2rem;
+  background-color: white;
+  position: relative;
+  z-index: 10001;
 }
 
 .formTrigger__header {
@@ -14,7 +27,7 @@
 }
 
 .formTrigger__btn {
-  padding: 2px 3px;
+  padding: 10px 15px;
   color: white;
   background-color: black;
   cursor: pointer;
