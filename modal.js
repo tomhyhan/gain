@@ -3,6 +3,8 @@ class App {
     const app = this; 
     app.root = root;
 
+    console.assert(app.root != null, "root should exist")
+
     // while developing
     app.injectCSS()
 
@@ -22,27 +24,53 @@ class App {
     const formTrigger = new FormTrigger()
     app.page.addChild(formTrigger)
 
+    overlay.element.addEventListener("click", () => {
+      overlay.element.classList.add("remove")
+      // animation time + buffer
+      setTimeout(() => {
+        overlay.element.remove()
+      }, 350)
+    })
+
+    if (window.innerWidth < 768) {
+      app.page.element.scrollIntoView({
+        behavior: 'smooth', block: 'center'
+      });
+    }
   }
 
   injectCSS = () => {
     const css = `
 /* From Trigger */
+
 .form-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0,0,0,0.3);
+  background-color: rgba(0,0,0,0.4);
   z-index: 10000; /* header is 9999 */
 
+  animation: fadeIn 0.3s ease-out
 }
 
-.formTrigger {
+.form-overlay.remove {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+.form-page {
   padding: 2rem;
   background-color: white;
   position: relative;
   z-index: 10001;
+}
+
+.form-page.dismiss {
+  animation: 
+}
+
+.formTrigger {
 }
 
 .formTrigger__header {
@@ -60,6 +88,19 @@ class App {
   background-color: black;
   cursor: pointer;
 }
+
+
+/* animation */
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes fadeOut {
+  from {opacity: 1;}
+  to {opacity: 0;}
+}
+
 
 
     `
