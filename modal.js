@@ -3,7 +3,7 @@ class App {
     const app = this; 
     app.root = root;
 
-    console.assert(app.root != null, "root should exist")
+    console.assert(app.root != null, "root must exist")
 
     // while developing
     app.injectCSS()
@@ -24,6 +24,7 @@ class App {
     const formTrigger = new FormTrigger()
     app.page.addChild(formTrigger)
 
+    // clicking overlay removes it
     overlay.element.addEventListener("click", () => {
       overlay.element.classList.add("remove")
       // animation time + buffer
@@ -32,6 +33,7 @@ class App {
       }, 350)
     })
 
+    // navigate to from trigger when window size is lt 768
     if (window.innerWidth < 768) {
       app.page.element.scrollIntoView({
         behavior: 'smooth', block: 'center'
@@ -41,6 +43,40 @@ class App {
 
   injectCSS = () => {
     const css = `
+/* form button  */
+.form-btn {
+  cursor: pointer;
+  transition: all 0.1s linear;
+  border: 2px solid #2b2b2b;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  box-shadow: 0 3px 2px 2px #4e4e4e;
+}
+
+.form-btn:hover {
+  filter: brightness(80%);
+}
+
+.form-btn:focus, 
+.form-btn:disabled, 
+.form-btn:active {
+  box-shadow: none;
+}
+
+.form-btn:focus {
+  outline: 2px solid white;
+  border: 2px solid skyblue;
+}
+
+.form-btn:disabled {
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+
+.form-btn:active {
+}
 /* From Trigger */
 
 .form-overlay {
@@ -66,10 +102,6 @@ class App {
   z-index: 10001;
 }
 
-.form-page.dismiss {
-  animation: 
-}
-
 .formTrigger {
 }
 
@@ -83,10 +115,9 @@ class App {
 }
 
 .formTrigger__btn {
-  padding: 10px 15px;
   color: white;
   background-color: black;
-  cursor: pointer;
+  background-color: green;
 }
 
 
@@ -102,6 +133,7 @@ class App {
 }
 
 
+/* page break point: 768px */* page break point: 768px */
 
     `
     const styleElement = document.createElement("style");
@@ -137,7 +169,7 @@ class FormTrigger extends BaseComponent {
     super(`<section class="formTrigger">
       <h4 class="formTrigger__header">Hello Conversion!</h4>
       <p class="formTrigger__p">Click on the button below to contact us</p>
-      <button class="formTrigger__btn">Click here</button>
+      <button class="form-btn formTrigger__btn">Click here</button>
     </section>`)
   }
 }
