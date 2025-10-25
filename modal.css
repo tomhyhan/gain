@@ -1,0 +1,21 @@
+/* From Trigger */
+.formTrigger {
+  padding: 1rem;
+
+}
+
+.formTrigger__header {
+
+}
+
+.formTrigger__p {
+  color: gray
+
+}
+
+.formTrigger__btn {
+  padding: 2px 3px;
+  color: white;
+  background-color: black;
+  cursor: pointer;
+}
