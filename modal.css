@@ -77,6 +77,56 @@
 }
 
 
+/* form modal */
+.form-modal-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  z-index: 10003; /* Above form overlay */
+  width: 90%;
+  max-width: 500px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.form-modal-container.remove {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+.form-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.form-modal__close:hover {
+  color: #000;
+}
+
+.form-modal .checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  margin: 0.5rem 0;
+}
+
+.form-modal .checkbox-group input {
+  width: 20px;
+  height: 20px;
+  border: 1px solid black;
+  margin-right: 10px;
+  margin-top: 5px;
+}
+
 /* animation */
 @keyframes fadeIn {
   from {opacity: 0;}
