@@ -81,22 +81,25 @@ const cssStrong = `
 class App {
   constructor(root) {
     const app = this; 
+
+    if (!root) throw new Error("root must not be null");
+
     app.root = root;
 
-    console.assert(app.root != null, "root must exist")
-
+    // Single API service class to be used in App
     const apiService = new ApiService()
 
-    // while developing
-    app.injectCSS()
+    app.injectSwiper()
     
     // attach page to body
     app.page = new PageComponent();
     app.page.attachTo(app.root);
 
+    // add drawer header to page 
     const drawerHeader = new Drawer();
     app.page.addChild(drawerHeader);
 
+    // add drawer content to page 
     const drawerContent = new DrawerContent();
     app.page.addChild(drawerContent);
 
@@ -107,18 +110,22 @@ class App {
 
     app.loadProducts(apiService, drawerContent);
   }
-  injectCSS = () => {
+  
+  injectSwiper = () => {
+    // quick reference to css while in dev mode
     const css = cssStrong
 
     const styleElement = document.createElement("style");
     styleElement.innerHTML = css;
     document.head.appendChild(styleElement);
-    // swiper
+    
+    // load swiper css
     const swiperCSS = document.createElement('link');
     swiperCSS.rel = "stylesheet";
     swiperCSS.href = "https://unpkg.com/swiper/swiper-bundle.min.css";
     document.head.appendChild(swiperCSS);  
     
+    // load swiper script
     this.swiperLoadPromise = new Promise((resolve, reject) => {
       const swiper = document.createElement("script");
       swiper.src = 'https://unpkg.com/swiper/swiper-bundle.min.js';
@@ -141,7 +148,6 @@ class App {
     } catch (e){
       throw new Error(e)
     }
-
   }
 }
 
@@ -199,8 +205,9 @@ class DrawerContent extends BaseComponent {
         <ul class='swiper-wrapper'></ul>
       </div>
       `)
-    
-    this.swiperWrapper = this.element.querySelector(".swiper-wrapper")
+
+    const drawerContent = this;
+    drawerContent.swiperWrapper = drawerContent.element.querySelector(".swiper-wrapper")
   }
   
   toggle = () => {
@@ -208,14 +215,21 @@ class DrawerContent extends BaseComponent {
   }
 
   addChild = (child) => {
-    console.log("this.swiperWrapper", this.swiperWrapper)
     child.attachTo(this.swiperWrapper, "beforeend") 
   }
 
   initSwiper = () => {
     this.swiper = new Swiper(this.element, {
-      slidesPerView: "auto",
-      spaceBetween:10
+      slidesPerView: 3,
+      spaceBetween:10,
+      pagination : {
+        el: ".swiper-pagination",
+        type: "fraction"
+      },
+      navigation : {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev"
+      }
     })
   }
 }
