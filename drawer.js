@@ -12,26 +12,7 @@ const chevronIcon = `<svg
   <polyline points="18 15 12 9 6 15"></polyline>
 </svg>`
 
-class App {
-  constructor(root) {
-    const app = this; 
-    app.root = root;
-
-    console.assert(app.root != null, "root must exist")
-
-    // while developing
-    app.injectCSS()
-    
-    // attach page to body
-    const page = new PageComponent();
-    page.attachTo(app.root);
-
-    const drawer = new Drawer();
-    page.addChild(drawer);
-
-  }
-  injectCSS = () => {
-    const css = `
+const cssStrong = `
     :root {
   /* color */
   --drawer-page-color: #edbf60;
@@ -71,7 +52,49 @@ class App {
 .drawer__h {
   font-weight: bold;
 }
+
+.drawer__icon {
+  cursor: pointer;
+}
+
+.drawer__icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* drawer content*/
+.drawer-content__hidden {
+  display: none;
+}
 `
+class App {
+  constructor(root) {
+    const app = this; 
+    app.root = root;
+
+    console.assert(app.root != null, "root must exist")
+
+    // while developing
+    app.injectCSS()
+    
+    // attach page to body
+    app.page = new PageComponent();
+    app.page.attachTo(app.root);
+
+    const drawerHeader = new Drawer();
+    app.page.addChild(drawerHeader);
+
+    const drawerContent = new DrawerContent();
+    app.page.addChild(drawerContent);
+
+    drawerHeader.setOnToggleListener(() => {
+      drawerHeader.toggleIcon();
+        drawerContent.toggle();
+    });
+
+  }
+  injectCSS = () => {
+    const css = cssStrong
+
     const styleElement = document.createElement("style");
     styleElement.innerHTML = css;
     document.head.appendChild(styleElement);
@@ -106,10 +129,50 @@ class Drawer extends BaseComponent {
     super(`
       <section class='drawer'>
         <h7 class='drawer__h'>Stickey drawer</h7>
-        <span>${chevronIcon}</span>
+        <span class="drawer__icon">${chevronIcon}</span>
       </section>`)
+    const drawer = this
+    drawer.toggleBtn = drawer.element.querySelector('.drawer__icon');
+
+    drawer.toggleBtn.addEventListener('click', () => {
+      console.log("clicked")
+      drawer.onToggleListener && drawer.onToggleListener();
+    });
+  }
+
+  setOnToggleListener = (listener) => {
+    this.onToggleListener = listener
+  }
+
+  toggleIcon = () => {
+    this.toggleBtn.classList.toggle('rotated')
+  }
+}
+
+class DrawerContent extends BaseComponent {
+  constructor() {
+    super(`
+      <div class='drawer-content drawer-content__hidden'>
+        <ul>
+          <li>list Item 1</li>
+          <li>List Item 2</li>
+          <li>List Item 3</li>
+        </ul>
+      </div>
+      `)
+  }
+  
+  toggle = () => {
+    this.element.classList.toggle("drawer-content__hidden")
   }
 }
 
 const body = document.body
 new App(body)
+
+
+class PokemonService {
+  constructor() {
+    this.url = ""
+  }
+}
