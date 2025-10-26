@@ -1,75 +1,4 @@
-class App {
-  constructor(root) {
-    const app = this; 
-    app.root = root;
-
-    console.assert(app.root != null, "root must exist")
-
-    // while developing
-    app.injectCSS()
-
-    // remove all elements in form container
-    app.root.innerHTML = ""; 
-    app.root.style.backgroundColor = "transparent";
-    app.root.style.padding = 0;
-
-    // trigger glass wall effect
-    const overlay = new Overlay()
-    overlay.attachTo(document.body)
-
-    // attach page to form container
-    const page = new PageComponent();
-    page.attachTo(app.root);
-
-    // add form trigger to page 
-    const formTrigger = new FormTrigger()
-    page.addChild(formTrigger)
-
-    const modal = new Modal()
-
-    // clicking overlay removes it
-    overlay.element.addEventListener("click", () => {
-      overlay.element.classList.add("remove")
-      // animation time + buffer
-      setTimeout(() => {
-        overlay.element.remove()
-      }, 350)
-    })
-
-    const formTriggerBtn = document.querySelector(".formTrigger__btn")
-    formTriggerBtn.addEventListener("click", () => {
-      const overlay = new Overlay()
-      overlay.attachTo(document.body)
-      overlay.putAboveFormTrigger()
-
-      modal.element.classList.remove("remove");
-      modal.attachTo(document.body)
-
-      const closeModal = () => {
-        overlay.element.classList.add("remove")
-        modal.element.classList.add("remove")
-        
-        setTimeout(() => {
-          overlay.element.remove()
-          modal.element.remove() 
-        }, 350)
-      }
-
-      overlay.element.addEventListener("click", closeModal)
-
-      modal.element.querySelector(".form-modal__close").onclick = closeModal;
-    })
-
-    // navigate to from trigger when window size is lt 768
-    if (window.innerWidth < 768) {
-      page.element.scrollIntoView({
-        behavior: 'smooth', block: 'center'
-      });
-    }
-  }
-
-  injectCSS = () => {
-    const css = `
+const cssString = `
 /* todo: define color variables using root */
 :root {
   /* colors */
@@ -377,7 +306,82 @@ class App {
     align-items: start;
   }
 }
+
 `
+class App {
+  constructor(root) {
+    const app = this; 
+    if (!root) {
+      throw new Error("root must not be null")
+    }
+    app.root = root;
+
+    // while developing
+    app.injectCSS()
+
+    // remove all elements in form container
+    app.root.innerHTML = ""; 
+    app.root.style.backgroundColor = "transparent";
+    app.root.style.padding = 0;
+
+    // trigger glass wall effect
+    const overlay = new Overlay()
+    overlay.attachTo(document.body)
+
+    // attach page to form container
+    app.page = new PageComponent();
+    app.page.attachTo(app.root);
+
+    // add form trigger to page 
+    const formTrigger = new FormTrigger()
+    app.page.addChild(formTrigger)
+
+    const modal = new Modal()
+
+    // clicking background removes overlay
+    overlay.element.addEventListener("click", () => {
+      overlay.element.classList.add("remove")
+      // animation time + buffer
+      setTimeout(() => {
+        overlay.removeFrom(document.body)
+      }, 350)
+    })
+
+    // clicking btn opens modal
+    const formTriggerBtn = document.querySelector(".formTrigger__btn")
+    formTriggerBtn.addEventListener("click", () => {
+      const overlay = new Overlay()
+      overlay.attachTo(document.body)
+      overlay.putAboveFormTrigger()
+
+      modal.element.classList.remove("remove");
+      modal.attachTo(document.body)
+
+      const closeModalListner = () => {
+        overlay.element.classList.add("remove")
+        modal.element.classList.add("remove")
+        
+        setTimeout(() => {
+          overlay.removeFrom(document.body)
+          modal.removeFrom(document.body) 
+        }, 350)
+      }
+
+      overlay.element.addEventListener("click", closeModalListner)
+      modal.setOnCloseListner(closeModalListner)
+    })
+
+    // navigate to form trigger when window size is lt 768
+    if (window.innerWidth < 768) {
+      app.page.element.scrollIntoView({
+        behavior: 'smooth', block: 'center'
+      });
+    }
+  }
+
+  injectCSS = () => {
+    const css = cssString;
+
     const styleElement = document.createElement("style");
     styleElement.innerHTML = css;
     document.head.appendChild(styleElement);
@@ -393,6 +397,13 @@ class BaseComponent {
 
   attachTo = (parent, position="afterbegin") => {
     parent.insertAdjacentElement(position, this.element);
+  }
+
+  removeFrom = (parent) => {
+    if (parent !== this.element.parentElement) {
+      throw new Error("parent mismatch")
+    }
+    parent.removeChild(this.element)
   }
 }
 
@@ -505,8 +516,15 @@ class Modal extends BaseComponent {
     modal.steps = modal.element.querySelectorAll(".form-step");
     modal.progressSteps = modal.element.querySelectorAll(".form-progress-step");
     
+    const closeBtn = modal.element.querySelector(".form-modal__close");
+    closeBtn.onclick = () => modal.closeListener && modal.closeListener()
+
     modal.addEventListeners();
     modal.render();
+  }
+
+  setOnCloseListner = (listener) => {
+    this.closeListener = listener
   }
 
   goToStep = (targetStep) => {
