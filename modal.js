@@ -339,7 +339,8 @@ class App {
     const modal = new Modal()
 
     // clicking background removes overlay
-    overlay.element.addEventListener("click", () => {
+    // overlay knows nothing about click logic
+    overlay.setOnCloseListner(() => {
       overlay.element.classList.add("remove")
       // animation time + buffer
       setTimeout(() => {
@@ -347,7 +348,7 @@ class App {
       }, 350)
     })
 
-    // clicking btn opens modal
+    // clicking button opens a modal
     const formTriggerBtn = document.querySelector(".formTrigger__btn")
     formTriggerBtn.addEventListener("click", () => {
       const overlay = new Overlay()
@@ -367,7 +368,8 @@ class App {
         }, 350)
       }
 
-      overlay.element.addEventListener("click", closeModalListner)
+      // reuse overlay with different close logic
+      overlay.setOnCloseListner(closeModalListner)
       modal.setOnCloseListner(closeModalListner)
     })
 
@@ -598,6 +600,12 @@ class Modal extends BaseComponent {
 class Overlay extends BaseComponent {
   constructor() {
     super("<div class='form-overlay'></div>")
+    const overlay = this;
+    overlay.element.addEventListener("click", () => overlay.closeListener && overlay.closeListener())
+  }
+
+  setOnCloseListner = (listener) => {
+    this.closeListener = listener
   }
 
   putAboveFormTrigger = () => {
