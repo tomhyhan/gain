@@ -1,25 +1,52 @@
-:root {
+    :root {
   /* color */
   --drawer-page-color: #edbf60;
 
   /* size */
+  --border-radius-small: 8px;
+  --padding-small: 0.5rem;
+  --padding-medium: 1rem;
 }
 
 /* drawer page layout */
 .drawer-page {
+  box-sizing: border-box;
   position: fixed;
-  
   bottom: 0;
-  left: 50%;
 
+  left: 50%;
+  transform: translate(-50%);
+
+  max-width: 400px;
   width: 100%;
-  height: 80px;
 
   z-index: 1000;
-
   background-color: var(--drawer-page-color);
-  padding: 1rem;
+  
+  border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
+  padding: var(--padding-small) var(--padding-medium);
+}
+
+/* drawer */
+.drawer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.drawer__h {
+  font-weight: bold;
+}
+
+.drawer__icon {
+  cursor: pointer;
+}
+
+.drawer__icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* drawer content*/
+.drawer-content__hidden {
+  display: none;
 }

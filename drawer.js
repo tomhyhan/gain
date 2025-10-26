@@ -29,17 +29,11 @@ const cssStrong = `
   position: fixed;
   bottom: 0;
 
-  left: 50%;
-  transform: translate(-50%);
-
-  max-width: 400px;
+  left: 0;
   width: 100%;
 
   z-index: 1000;
-  background-color: var(--drawer-page-color);
   
-  border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
-  padding: var(--padding-small) var(--padding-medium);
 }
 
 /* drawer */
@@ -47,6 +41,14 @@ const cssStrong = `
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto; 
+
+  background-color: var(--drawer-page-color);
+  border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
+  padding: var(--padding-small) var(--padding-medium);
 }
 
 .drawer__h {
@@ -62,6 +64,16 @@ const cssStrong = `
 }
 
 /* drawer content*/
+.drawer-content {
+  width: 100%;
+  background-color: white;
+  height: 200px;
+}
+
+.drawer-page ul {
+  margin: 0;
+}
+
 .drawer-content__hidden {
   display: none;
 }
@@ -72,6 +84,8 @@ class App {
     app.root = root;
 
     console.assert(app.root != null, "root must exist")
+
+    const apiService = new ApiService()
 
     // while developing
     app.injectCSS()
@@ -88,9 +102,10 @@ class App {
 
     drawerHeader.setOnToggleListener(() => {
       drawerHeader.toggleIcon();
-        drawerContent.toggle();
+      drawerContent.toggle();
     });
 
+    app.loadProducts(apiService, drawerContent);
   }
   injectCSS = () => {
     const css = cssStrong
@@ -98,6 +113,34 @@ class App {
     const styleElement = document.createElement("style");
     styleElement.innerHTML = css;
     document.head.appendChild(styleElement);
+    // swiper
+    const swiperCSS = document.createElement('link');
+    swiperCSS.rel = "stylesheet";
+    swiperCSS.href = "https://unpkg.com/swiper/swiper-bundle.min.css";
+    document.head.appendChild(swiperCSS);  
+    
+    this.swiperLoadPromise = new Promise((resolve, reject) => {
+      const swiper = document.createElement("script");
+      swiper.src = 'https://unpkg.com/swiper/swiper-bundle.min.js';
+
+      swiper.onload = () => resolve()
+      swiper.onerror = () => reject(new Error("Failed to load Swiper"))
+    })
+  }
+
+  loadProducts = async (apiService, drawerContent) => {
+    const products = await apiService.getProducts()
+    products.forEach(product => {
+      const slide = new Slide(product);
+      drawerContent.addChild(slide)
+    })
+    try {
+      await this.swiperLoadPromise;
+      drawerContent.initSwiper()
+    } catch (e){
+      throw new Error(e)
+    }
+
   }
 }
 
@@ -112,15 +155,15 @@ class BaseComponent {
   attachTo = (parent, position="afterbegin") => {
     parent.insertAdjacentElement(position, this.element);
   }
+
+  addChild = (child) => {
+    child.attachTo(this.element, "beforeend")
+  }
 }
 
 class PageComponent extends BaseComponent {
   constructor() {
     super("<div class='drawer-page'></div>");
-  }
-
-  addChild = (child) => {
-    child.attachTo(this.element, "beforeend")
   }
 }
 
@@ -135,7 +178,6 @@ class Drawer extends BaseComponent {
     drawer.toggleBtn = drawer.element.querySelector('.drawer__icon');
 
     drawer.toggleBtn.addEventListener('click', () => {
-      console.log("clicked")
       drawer.onToggleListener && drawer.onToggleListener();
     });
   }
@@ -152,27 +194,75 @@ class Drawer extends BaseComponent {
 class DrawerContent extends BaseComponent {
   constructor() {
     super(`
-      <div class='drawer-content drawer-content__hidden'>
-        <ul>
-          <li>list Item 1</li>
-          <li>List Item 2</li>
-          <li>List Item 3</li>
-        </ul>
+      <div class='drawer-content drawer-content__hidden swiper'>
+        <ul class='swiper-wrapper'></ul>
       </div>
       `)
+    
+    this.swiperWrapper = this.element.querySelector(".swiper-wrapper")
   }
   
   toggle = () => {
     this.element.classList.toggle("drawer-content__hidden")
   }
+
+  addChild = (child) => {
+    console.log("this.swiperWrapper", this.swiperWrapper)
+    child.attachTo(this.swiperWrapper, "beforeend") 
+  }
+
+  initSwiper = () => {
+    this.swiper = new Swiper(this.element, {
+      slidesPerView: "auto",
+      spaceBetween:10
+    })
+  }
+}
+
+class Slide extends BaseComponent {
+  constructor(product) {
+   super(`
+      <li class="drawer-slide swiper-slide">
+        <img class="drawer-slide__img" src="${product.image}" alt="${product.header}">
+        <div class="drawer-slide__info">
+          <h4 class="drawer-slide__header">${product.header}</h4>
+          <p class="drawer-slide__desc">${product.description}</p>
+        </div>
+        <button"drawer-slide__btn">view</button>
+      </li>
+    `) 
+  }
+}
+
+class ApiService {
+  constructor() {
+    this.baseUrl = "https://dummyjson.com/";
+  }
+
+  getProducts = async (limit = 2) => {
+    const url = `${this.baseUrl}products?limit=${limit}`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return this.normalizeProducts(data.products); 
+    } catch (e) {
+      throw new Error(`("Failed to fetch products:", ${e}`)
+    }
+  }
+
+  normalizeProducts = (products) =>{
+    return products.map(product => {
+      return {
+        header: product.title,
+        description: product.description,
+        image: product. thumbnail,
+      }
+    })
+  }
 }
 
 const body = document.body
 new App(body)
-
-
-class PokemonService {
-  constructor() {
-    this.url = ""
-  }
-}
