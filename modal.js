@@ -18,12 +18,12 @@ class App {
     overlay.attachTo(document.body)
 
     // attach page to form container
-    app.page = new PageComponent();
-    app.page.attachTo(app.root);
+    const page = new PageComponent();
+    page.attachTo(app.root);
 
     // add form trigger to page 
     const formTrigger = new FormTrigger()
-    app.page.addChild(formTrigger)
+    page.addChild(formTrigger)
 
     const modal = new Modal()
 
@@ -62,7 +62,7 @@ class App {
 
     // navigate to from trigger when window size is lt 768
     if (window.innerWidth < 768) {
-      app.page.element.scrollIntoView({
+      page.element.scrollIntoView({
         behavior: 'smooth', block: 'center'
       });
     }
