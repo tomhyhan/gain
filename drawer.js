@@ -125,6 +125,7 @@ class App {
 
       swiper.onload = () => resolve()
       swiper.onerror = () => reject(new Error("Failed to load Swiper"))
+      document.head.appendChild(swiper);
     })
   }
 
@@ -228,7 +229,7 @@ class Slide extends BaseComponent {
           <h4 class="drawer-slide__header">${product.header}</h4>
           <p class="drawer-slide__desc">${product.description}</p>
         </div>
-        <button"drawer-slide__btn">view</button>
+        <button class="drawer-slide__btn">view</button>
       </li>
     `) 
   }
@@ -239,7 +240,7 @@ class ApiService {
     this.baseUrl = "https://dummyjson.com/";
   }
 
-  getProducts = async (limit = 2) => {
+  getProducts = async (limit = 5) => {
     const url = `${this.baseUrl}products?limit=${limit}`;
     try {
       const response = await fetch(url);
