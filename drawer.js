@@ -11,7 +11,7 @@ const chevronIcon = `<svg
 >
   <polyline points="18 15 12 9 6 15"></polyline>
 </svg>`
-
+// todo: disabled and color to white 
 const cssStrong = `
     :root {
   /* color */
@@ -22,6 +22,7 @@ const cssStrong = `
   --padding-small: 0.5rem;
   --padding-medium: 1rem;
   --flex-gap-small: 0.5rem;
+  --flex-gap-medium: 1.0rem;
   --drawer-content-height: 250px;
 
   /* animation delay */
@@ -46,13 +47,17 @@ const cssStrong = `
   align-items: center;
   justify-content: space-between;
 
-  max-width: 400px;
+  max-width: 450px;
   width: 100%;
   margin: 0 auto; 
 
   background-color: var(--drawer-page-color);
   border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
   padding: var(--padding-small) var(--padding-medium);
+}
+
+.drawer.is-open {
+  background-color: white;
 }
 
 .drawer.is-open .drawer__controls {
@@ -76,7 +81,8 @@ const cssStrong = `
 .drawer__controls {
   display: flex;
   align-items: center;
-  gap: var(--flex-gap-small);
+  gap: var(--flex-gap-medium);
+  margin-left: 100px;
 
   visibility: hidden;
   opacity:0;
@@ -85,16 +91,15 @@ const cssStrong = `
 .drawer .swiper-button-next-drawer,
 .drawer .swiper-button-prev-drawer {
   position: static;
-  width: auto;
-  height: auto;
   margin: 0;
-
-  font-size: 14px;
+  font-size: medium;
+  font-weight: bold;
 }
 
 .drawer .swiper-button-prev-drawer::after,
 .drawer .swiper-button-next-drawer::after {
   font-family: "swiper-icons"; 
+  cursor:pointer;
 }
 
 .drawer .swiper-button-prev-drawer::after {
@@ -105,10 +110,16 @@ const cssStrong = `
   content: "next"; 
 }
 
+.drawer .swiper-button-prev-drawer.swiper-button-disabled,
+.drawer .swiper-button-next-drawer.swiper-button-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .drawer .swiper-pagination-drawer {
   position: static;
-  width: auto;
   fron-weight: bold;
+  font-size: small;
 }
 
 /* drawer content*/
@@ -130,14 +141,15 @@ const cssStrong = `
   max-height: 0;
 }
 
-
 /* animation */
 .drawer-content-wrapper, 
 .drawer-content__hidden,
 .drawer.is-open .drawer__controls,
 .drawer__controls,
 .drawer__icon.rotated,
-.drawer__icon {
+.drawer__icon,
+.drawer.is-open,
+.drawer {
   transition: all var(--animation-delay) ease-in;
 }
 `
