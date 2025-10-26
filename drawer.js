@@ -22,6 +22,10 @@ const cssStrong = `
   --padding-small: 0.5rem;
   --padding-medium: 1rem;
   --flex-gap-small: 0.5rem;
+  --drawer-content-height: 250px;
+
+  /* animation delay */
+  --animation-delay: 0.3s;
 }
 
 /* drawer page layout */
@@ -111,7 +115,7 @@ const cssStrong = `
 .drawer-content-wrapper {
   width: 100%;
   background-color: white;
-  height: 200px;
+  max-height: var(--drawer-content-height);
 }
 
 .drawer-content {
@@ -123,9 +127,21 @@ const cssStrong = `
 }
 
 .drawer-content__hidden {
-  display: none;
+  max-height: 0;
+}
+
+
+/* animation */
+.drawer-content-wrapper, 
+.drawer-content__hidden,
+.drawer.is-open .drawer__controls,
+.drawer__controls,
+.drawer__icon.rotated,
+.drawer__icon {
+  transition: all var(--animation-delay) ease-in;
 }
 `
+
 class App {
   constructor(root) {
     const app = this; 
