@@ -21,6 +21,7 @@ const cssStrong = `
   --border-radius-small: 8px;
   --padding-small: 0.5rem;
   --padding-medium: 1rem;
+  --flex-gap-small: 0.5rem;
 }
 
 /* drawer page layout */
@@ -36,7 +37,7 @@ const cssStrong = `
   
 }
 
-/* drawer */
+/* drawer header */
 .drawer {
   display: flex;
   align-items: center;
@@ -63,11 +64,51 @@ const cssStrong = `
   transform: rotate(180deg);
 }
 
+/* drawer header control*/
+.drawer__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--flex-gap-small);
+}
+
+.drawer .swiper-button-next-drawer,
+.drawer .swiper-button-prev-drawer {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+
+  font-size: 14px;
+}
+
+.drawer .swiper-button-prev-drawer::after,
+.drawer .swiper-button-next-drawer::after {
+  font-family: "swiper-icons"; 
+}
+
+.drawer .swiper-button-prev-drawer::after {
+  content: "prev"; 
+}
+
+.drawer .swiper-button-next-drawer::after {
+  content: "next"; 
+}
+
+.drawer .swiper-pagination-drawer {
+  position: static;
+  width: auto;
+  fron-weight: bold;
+}
+
 /* drawer content*/
-.drawer-content {
+.drawer-content-wrapper {
   width: 100%;
   background-color: white;
   height: 200px;
+}
+
+.drawer-content {
+  height: 100%;
 }
 
 .drawer-page ul {
@@ -85,6 +126,7 @@ class App {
     if (!root) throw new Error("root must not be null");
 
     app.root = root;
+    app.swiperInitialized = false;
 
     // Single API service class to be used in App
     const apiService = new ApiService()
@@ -100,7 +142,7 @@ class App {
     app.page.addChild(drawerHeader);
 
     // add drawer content to page 
-    const drawerContent = new DrawerContent();
+    const drawerContent = new DrawerContent(app.swiperLoadPromise);
     app.page.addChild(drawerContent);
 
     drawerHeader.setOnToggleListener(() => {
@@ -119,16 +161,16 @@ class App {
     styleElement.innerHTML = css;
     document.head.appendChild(styleElement);
     
-    // load swiper css
+    // // load swiper css
     const swiperCSS = document.createElement('link');
     swiperCSS.rel = "stylesheet";
-    swiperCSS.href = "https://unpkg.com/swiper/swiper-bundle.min.css";
+    swiperCSS.href = "https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css";
     document.head.appendChild(swiperCSS);  
     
     // load swiper script
     this.swiperLoadPromise = new Promise((resolve, reject) => {
       const swiper = document.createElement("script");
-      swiper.src = 'https://unpkg.com/swiper/swiper-bundle.min.js';
+      swiper.src = 'https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js';
 
       swiper.onload = () => resolve()
       swiper.onerror = () => reject(new Error("Failed to load Swiper"))
@@ -142,12 +184,12 @@ class App {
       const slide = new Slide(product);
       drawerContent.addChild(slide)
     })
-    try {
-      await this.swiperLoadPromise;
-      drawerContent.initSwiper()
-    } catch (e){
-      throw new Error(e)
-    }
+    // try {
+    //   await this.swiperLoadPromise;
+    //   drawerContent.initSwiper()
+    // } catch (e){
+    //   throw new Error(e)
+    // }
   }
 }
 
@@ -177,8 +219,13 @@ class PageComponent extends BaseComponent {
 class Drawer extends BaseComponent {
   constructor() {
     super(`
-      <section class='drawer'>
-        <h7 class='drawer__h'>Stickey drawer</h7>
+      <section class="drawer">
+        <h7 class="drawer__h">Stickey drawer</h7>
+        <div class="drawer__controls">
+          <div class="swiper-button-prev-drawer"></div>
+          <div class="swiper-pagination-drawer"></div>
+          <div class="swiper-button-next-drawer"></div>
+        </div>
         <span class="drawer__icon">${chevronIcon}</span>
       </section>`)
     const drawer = this
@@ -199,19 +246,29 @@ class Drawer extends BaseComponent {
 }
 
 class DrawerContent extends BaseComponent {
-  constructor() {
+  constructor(swiperLoadPromise) {
     super(`
-      <div class='drawer-content drawer-content__hidden swiper'>
-        <ul class='swiper-wrapper'></ul>
+      <div class="drawer-content-wrapper drawer-content__hidden">
+        <div class='drawer-content swiper'>
+          <ul class='swiper-wrapper'></ul>
+        </div>
       </div>
       `)
 
     const drawerContent = this;
-    drawerContent.swiperWrapper = drawerContent.element.querySelector(".swiper-wrapper")
+    drawerContent.swiperWrapper = drawerContent.element.querySelector(".swiper-wrapper");
+    drawerContent.swiperContainer = drawerContent.element.querySelector(".drawer-content");
+    
+    drawerContent.swiperLoadPromise = swiperLoadPromise;
+    drawerContent.swiperInitialized = false;
   }
   
   toggle = () => {
-    this.element.classList.toggle("drawer-content__hidden")
+    const drawerContent = this;
+    drawerContent.element.classList.toggle("drawer-content__hidden")
+
+    const isOpen = !drawerContent.element.classList.contains('drawer-content__hidden');
+    if (isOpen) drawerContent.initSwiper()
   }
 
   addChild = (child) => {
@@ -219,18 +276,30 @@ class DrawerContent extends BaseComponent {
   }
 
   initSwiper = () => {
-    this.swiper = new Swiper(this.element, {
-      slidesPerView: 3,
-      spaceBetween:10,
-      pagination : {
-        el: ".swiper-pagination",
-        type: "fraction"
-      },
-      navigation : {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev"
-      }
+    const drawerContent = this;
+
+    if (this.swiperInitialized) return;
+
+    drawerContent.swiperLoadPromise
+    .then(() => {
+      drawerContent.swiper = new Swiper(drawerContent.swiperContainer, {
+        slidesPerView: 3,
+        spaceBetween:10,
+        pagination : {
+          el: ".swiper-pagination-drawer",
+          type: "fraction"
+        },
+        navigation : {
+          nextEl: ".swiper-button-next-drawer",
+          prevEl: ".swiper-button-prev-drawer"
+        }
+      })
+      drawerContent.swiperInitialized = true;
     })
+      .catch(e => {
+        throw new Error(`Failed to load Swiper: ${e}`)
+      })
+
   }
 }
 
