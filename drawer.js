@@ -34,7 +34,6 @@ const cssStrong = `
   width: 100%;
 
   z-index: 1000;
-  
 }
 
 /* drawer header */
@@ -50,6 +49,11 @@ const cssStrong = `
   background-color: var(--drawer-page-color);
   border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
   padding: var(--padding-small) var(--padding-medium);
+}
+
+.drawer.is-open .drawer__controls {
+  visibility: visible;
+  opacity: 1;
 }
 
 .drawer__h {
@@ -69,6 +73,9 @@ const cssStrong = `
   display: flex;
   align-items: center;
   gap: var(--flex-gap-small);
+
+  visibility: hidden;
+  opacity:0;
 }
 
 .drawer .swiper-button-next-drawer,
@@ -241,7 +248,9 @@ class Drawer extends BaseComponent {
   }
 
   toggleIcon = () => {
-    this.toggleBtn.classList.toggle('rotated')
+    const drawer = this;
+    drawer.toggleBtn.classList.toggle('rotated')
+    drawer.element.classList.toggle('is-open')
   }
 }
 
@@ -278,7 +287,8 @@ class DrawerContent extends BaseComponent {
   initSwiper = () => {
     const drawerContent = this;
 
-    if (this.swiperInitialized) return;
+    if (drawerContent.swiperInitialized) return;
+    drawerContent.swiperInitialized = true;
 
     drawerContent.swiperLoadPromise
     .then(() => {
@@ -294,11 +304,10 @@ class DrawerContent extends BaseComponent {
           prevEl: ".swiper-button-prev-drawer"
         }
       })
-      drawerContent.swiperInitialized = true;
     })
-      .catch(e => {
-        throw new Error(`Failed to load Swiper: ${e}`)
-      })
+    .catch(e => {
+      throw new Error(`Failed to load Swiper: ${e}`)
+    })
 
   }
 }
