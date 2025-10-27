@@ -35,7 +35,7 @@ const cssStrong = `
   bottom: 0;
 
   width: 100%;
-  z-index: 1000;
+  z-index: 10001;
 }
 
 /* drawer header */
@@ -265,6 +265,7 @@ class App {
 
     app.root = root;
     app.swiperInitialized = false;
+    app.isDrawerOpen = false;
 
     // Single API service class to be used in App
     const apiService = new ApiService()
@@ -276,22 +277,24 @@ class App {
     app.page.attachTo(app.root);
 
     // add drawer header to page 
-    const drawerHeader = new Drawer();
-    app.page.addChild(drawerHeader);
+    app.drawerHeader = new Drawer();
+    app.page.addChild(app.drawerHeader);
 
     // add drawer content to page 
-    const drawerContent = new DrawerContent(app.swiperLoadPromise);
-    app.page.addChild(drawerContent);
+    app.drawerContent = new DrawerContent(app.swiperLoadPromise);
+    app.page.addChild(app.drawerContent);
 
-    drawerHeader.setOnToggleListener(() => {
-      drawerHeader.toggleIcon();
-      drawerContent.toggle();
+    app.overlay = new Overlay();
+    
+    // toggle logic
+    app.drawerHeader.setOnToggleListener(() => {
+      app.isDrawerOpen? app.closeDrawer(): app.openDrawer()
     });
 
-    app.loadProducts(apiService, drawerContent);
+    app.loadProducts(apiService);
   }
   
-  injectSwiper = () => {
+  injectSwiper() {
     // quick reference to css while in dev mode
     const css = cssStrong
 
@@ -316,12 +319,30 @@ class App {
     })
   }
 
-  loadProducts = async (apiService, drawerContent) => {
+  async loadProducts(apiService) {
     const products = await apiService.getProducts()
     products.forEach(product => {
       const slide = new Slide(product);
-      drawerContent.addChild(slide)
+      this.drawerContent.addChild(slide)
     })
+  }
+
+  openDrawer() {
+    const app = this;
+    if (app.isDrawerOpen) return;
+    app.isDrawerOpen = true;
+    app.drawerHeader.toggleIcon();
+    app.drawerContent.toggle();
+    app.overlay.attachTo(app.root);
+  }
+
+  closeDrawer() {
+    const app = this;
+    if (!app.isDrawerOpen) return;
+    app.isDrawerOpen = false;
+    app.drawerHeader.toggleIcon();
+    app.drawerContent.toggle();
+    app.overlay.remove();
   }
 }
 
@@ -333,12 +354,19 @@ class BaseComponent {
     this.element = template.content.firstElementChild;
   }
 
-  attachTo = (parent, position="afterbegin") => {
+  attachTo(parent, position="afterbegin") {
     parent.insertAdjacentElement(position, this.element);
   }
 
-  addChild = (child) => {
+  addChild(child) {
     child.attachTo(this.element, "beforeend")
+  }
+
+  removeFrom(parent) {
+    if (parent !== this.element.parentElement) {
+      throw new Error("parent mismatch")
+    }
+    parent.removeChild(this.element)
   }
 }
 
@@ -368,11 +396,11 @@ class Drawer extends BaseComponent {
     });
   }
 
-  setOnToggleListener = (listener) => {
+  setOnToggleListener(listener) {
     this.onToggleListener = listener
   }
 
-  toggleIcon = () => {
+  toggleIcon() {
     const drawer = this;
     drawer.toggleBtn.classList.toggle('rotated')
     drawer.element.classList.toggle('is-open')
@@ -397,7 +425,7 @@ class DrawerContent extends BaseComponent {
     drawerContent.swiperInitialized = false;
   }
   
-  toggle = () => {
+  toggle() {
     const drawerContent = this;
     drawerContent.element.classList.toggle("drawer-content__hidden")
 
@@ -405,11 +433,11 @@ class DrawerContent extends BaseComponent {
     if (isOpen) drawerContent.initSwiper()
   }
 
-  addChild = (child) => {
+  addChild(child) {
     child.attachTo(this.swiperWrapper, "beforeend") 
   }
 
-  initSwiper = () => {
+  initSwiper() {
     const drawerContent = this;
 
     if (drawerContent.swiperInitialized) return;
@@ -462,8 +490,21 @@ class Overlay extends BaseComponent {
     overlay.element.addEventListener("click", () => overlay.closeListener && overlay.closeListener())
   }
 
-  setOnCloseListner = (listener) => {
+  setOnCloseListner(listener) {
     this.closeListener = listener
+  }
+
+  attachTo(parent, position = "afterbegin") {
+    this.element.classList.remove("remove");
+    super.attachTo(parent, position);
+  }
+
+  remove() {
+    const overlay = this;
+    overlay.element.classList.add("remove")
+    overlay.element.addEventListener("animationend", () => {
+      overlay.removeFrom(overlay.element.parentElement)
+    }, {once:true})
   }
 }
 
@@ -472,7 +513,7 @@ class ApiService {
     this.baseUrl = "https://dummyjson.com/";
   }
 
-  getProducts = async (limit = 5) => {
+  async getProducts(limit = 5) {
     const url = `${this.baseUrl}products?limit=${limit}`;
     try {
       const response = await fetch(url);
@@ -486,7 +527,7 @@ class ApiService {
     }
   }
 
-  normalizeProducts = (products) =>{
+  normalizeProducts(products){
     console.log(products, "products")
     return products.map(product => {
       return {
