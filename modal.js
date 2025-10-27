@@ -339,8 +339,7 @@ class App {
     const modal = new Modal()
 
     // clicking background removes overlay
-    overlay.setOnCloseListner(() => {
-      overlay.remove()});
+    overlay.setOnCloseListner(() => overlay.remove());
 
     // clicking button opens a modal
     const formTriggerBtn = document.querySelector(".formTrigger__btn")
@@ -413,7 +412,6 @@ class PageComponent extends BaseComponent {
   constructor() {
     super("<div class='form-page'></div>");
   }
-
 }
 
 class FormTrigger extends BaseComponent {
@@ -425,53 +423,51 @@ class FormTrigger extends BaseComponent {
     </section>`)
   }
 }
-
+//    <form class="form-modal">
+//           <div class="form-step" data-step="1">
+//             <div class="form-step__name">
+//               <div class="inputbox-group">
+//                 <label for="fname">First name<span class="inputbox-group__star">*</span></label>
+//                 <input type="text" id="fname" name="fname" placeholder="First name" required>
+//               </div>
+//               <div class="inputbox-group">
+//                 <label for="lname">Last name</label>
+//                 <input type="text" id="lname" name="lname" placeholder="Last name">
+//               </div>
+//             </div>
+//             <div class="inputbox-group">
+//               <label for="email">Work Email<span class="inputbox-group__star">*</span></label>
+//               <input type="email" id="email" name="email" required placeholder="Work Email">
+//             </div>
+//             <div class="form-step__buttons">
+//               <button type="button" class="form-btn modal-btn__next">Next</button>
+//             </div>
+//           </div>
+      
+//           <div class="form-step" data-step="2">
+//             <div class="inputbox-group">
+//               <label for="help">How can we help you?<span class="inputbox-group__star">*</span></label>
+//               <textarea id="help" name="help" rows="4" placeholder="Tell us more about how we can help" required></textarea>
+//             </div>
+//             <div class="checkbox-group">
+//               <input type="checkbox" id="updates" name="updates">
+//               <label for="updates">Yes, I would like to receive updates and other information from Conversion</label>
+//             </div>
+//             <div class="form-step__buttons">
+//               <button type="button" class="form-btn modal-btn__back">Back</button>
+//               <button type="submit" class="form-btn modal-btn__submit">Get In Touch</button>
+//             </div>
+//           </div>
+      
+//           <div class="form-step" data-step="3">
+//             <h4>Thank You!</h4>
+//           </div>
+//         </form>
 class Modal extends BaseComponent {
   constructor() {
     super(`
       <div class="form-modal-container">
         <button class="form-modal__close" aria-label="Close modal">&times;</button>
-
-        <form class="form-modal">
-          <div class="form-step" data-step="1">
-            <div class="form-step__name">
-              <div class="inputbox-group">
-                <label for="fname">First name<span class="inputbox-group__star">*</span></label>
-                <input type="text" id="fname" name="fname" placeholder="First name" required>
-              </div>
-              <div class="inputbox-group">
-                <label for="lname">Last name</label>
-                <input type="text" id="lname" name="lname" placeholder="Last name">
-              </div>
-              </div>
-            <div class="inputbox-group">
-              <label for="email">Work Email<span class="inputbox-group__star">*</span></label>
-              <input type="email" id="email" name="email" required placeholder="Work Email">
-            </div>
-            <div class="form-step__buttons">
-              <button type="button" class="form-btn modal-btn__next">Next</button>
-            </div>
-          </div>
-      
-          <div class="form-step" data-step="2">
-            <div class="inputbox-group">
-              <label for="help">How can we help you?<span class="inputbox-group__star">*</span></label>
-              <textarea id="help" name="help" rows="4" placeholder="Tell us more about how we can help" required></textarea>
-            </div>
-            <div class="checkbox-group">
-              <input type="checkbox" id="updates" name="updates">
-              <label for="updates">Yes, I would like to receive updates and other information from Conversion</label>
-            </div>
-            <div class="form-step__buttons">
-              <button type="button" class="form-btn modal-btn__back">Back</button>
-              <button type="submit" class="form-btn modal-btn__submit">Get In Touch</button>
-            </div>
-          </div>
-      
-          <div class="form-step" data-step="3">
-            <h4>Thank You!</h4>
-          </div>
-        </form>
       </div>
     `);
 
@@ -484,10 +480,10 @@ class Modal extends BaseComponent {
     modal.progressbar = new ProgressBar()
     modal.addChild(modal.progressbar, "afterbegin")
 
-    modal.form = modal.element.querySelector(".form-modal");
-    modal.steps = modal.element.querySelectorAll(".form-step");
-    modal.progressSteps = modal.element.querySelectorAll(".form-progress-step");
-    
+    modal.form = new Form();
+    modal.addChild(modal.form);
+
+    modal.steps = modal.form.steps.map(step => step.element);
     const closeBtn = modal.element.querySelector(".form-modal__close");
     closeBtn.onclick = () => modal.closeListener && modal.closeListener()
 
@@ -501,11 +497,6 @@ class Modal extends BaseComponent {
 
   goToStep = (targetStep) => {
     const modal = this;
-    const currentStep = modal.state.currentStep;
-
-    if (targetStep > currentStep) {
-      if (!modal.validateStep(currentStep)) return;
-    }
     modal.state.currentStep = targetStep;
     modal.state.maxStep = Math.max(modal.state.maxStep, targetStep)
     modal.render();
@@ -522,16 +513,9 @@ class Modal extends BaseComponent {
 
   addEventListeners = () => {
     const modal = this
-    const nextBtn = modal.element.querySelector(".modal-btn__next");
-    nextBtn.addEventListener("click", () => modal.goToStep(2));
-
-    const backBtn = modal.element.querySelector(".modal-btn__back");
-    backBtn.addEventListener("click", () => modal.goToStep(1));
-
-    modal.form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      modal.goToStep(3);
-    })
+    modal.form.setOnNextListener(() => modal.validateStep(1) && modal.goToStep(2));
+    modal.form.setOnBackListener(() => modal.goToStep(1));
+    modal.form.setOnSubmitListener(() => modal.validateStep(2) && modal.goToStep(3));
 
     modal.progressbar.setOnStepClickListener((targetStep) => {
       if (targetStep <= modal.state.maxStep) 
@@ -540,21 +524,173 @@ class Modal extends BaseComponent {
   }
 
   validateStep = (stepNum) => {
-    const currentStepEl = this.element.querySelector(`.form-step[data-step="${stepNum}"]`);
-    const inputs = currentStepEl.querySelectorAll("input[required], textarea[required]");
-    
-    let allValid = true;
-    for (const input of inputs) {
-      if (!input.checkValidity()) {
-        allValid = false;
-        alert(`Please fill out all required fields.\n'${input.labels[0].innerText}' is required.`);
-        input.focus();
-        break; 
-      }
-    }
-    return allValid;
+    return this.form.validateStep(stepNum);
   }
 }
+
+class Form extends BaseComponent {
+  constructor() {
+    super(`<form class="form-modal"></form>`);
+
+    const step1 = new FormStep(1);
+    
+    const nameFields = new InputGroup('<div class="form-step__name"></div>');
+    nameFields.addInput(new TextInput("First name", "fname", "First name", true, "text", true));
+    nameFields.addInput(new TextInput("Last name", "lname", "Last name", false, "text", true));
+
+    step1.addInput(nameFields);
+    step1.addInput(new TextInput("Work Email", "email", "Work Email", true, "email", true));
+    step1.addButtons({ onNext: () => this.nextListener && this.nextListener()});
+    
+    const step2 = new FormStep(2);
+    step2.addInput(new TextInput( "How can we help you?", "help", "Tell us more about how we can help", true, "text", false ));
+    step2.addInput(new CheckBoxInput());
+    step2.addButtons({ 
+      onBack: () => this.backListener && this.backListener(), 
+      onSubmit: () => this.submitListener && this.submitListener()
+    });
+
+    const step3 = new FormStep(3);
+    step3.addChild(new BaseComponent("<h4>Thank You!</h4>"));
+
+    this.addChild(step1);
+    this.addChild(step2);
+    this.addChild(step3);
+
+    this.steps = [step1, step2, step3];
+  }
+
+  setOnNextListener = (listener) => {
+    this.nextListener = listener;
+  }
+
+  setOnBackListener = (listener) => {
+    this.backListener = listener;
+  }
+
+  setOnSubmitListener = (listener) => {
+    this.submitListener = listener;
+  }
+  
+  validateStep = (stepNum) => {
+    return this.steps[stepNum-1].validate()
+  }
+}
+
+class FormStep extends BaseComponent {
+  constructor(step) {
+    super(`<div class="form-step" data-step="${step}"></div>`);
+    this.inputs = [];
+  }
+
+  addInput = (input) => {
+    this.addChild(input)
+    this.inputs.push(input)
+  }
+
+  addButtons = ({ onNext, onBack, onSubmit }) => {
+    const buttonsContainer = new BaseComponent(
+      '<div class="form-step__buttons"></div>'
+    );
+    if (onBack) {
+      const backBtn = new FormBtn('button', 'modal-btn__back', 'Back');
+      backBtn.setOnClickListner(onBack);
+      buttonsContainer.addChild(backBtn);
+    }
+    if (onNext) {
+      const nextBtn = new FormBtn('button', 'modal-btn__next', 'Next');
+      nextBtn.setOnClickListner(onNext);
+      buttonsContainer.addChild(nextBtn);
+    }
+    if (onSubmit) {
+      const submitBtn = new FormBtn('button', 'modal-btn__submit', 'Get In Touch');
+      submitBtn.setOnClickListner(onSubmit);
+      buttonsContainer.addChild(submitBtn);
+    }
+    this.addChild(buttonsContainer);
+  }
+
+  validate = () => {
+    return this.inputs.every(input => input.validate());
+  }
+}
+
+class InputGroup extends BaseComponent {
+  constructor(innerHTML) {
+    super(innerHTML);
+    this.inputs = []; 
+  }
+  
+  addInput(input) {
+    this.addChild(input);
+    this.inputs.push(input);
+  }
+
+  validate() {
+    return this.inputs.every(input => input.validate());
+  }
+}
+
+class FormBtn extends BaseComponent {
+  constructor (type, btnClass, text) {
+    super(`
+      <button type="${type}" class="form-btn ${btnClass}">${text}</button>
+    `)
+
+    this.element.onclick = () => {
+      this.clickListener && this.clickListener()
+    }
+  }
+
+  setOnClickListner = (listener) => {
+    this.clickListener = listener
+  }
+}
+
+class TextInput extends BaseComponent {
+  constructor(label, name, placeHolder, isRequired, type="text", isTextArea=false) {
+    const required = isRequired? "required": ""
+    const star = isRequired? `<span class="inputbox-group__star">*</span>`: ""
+    const input = isTextArea 
+      ?`<input type="${type}" id="${name}" name="${name}" placeholder="${placeHolder}" ${required}>`
+      : `<textarea id="help" name="help" rows="4" placeholder="${placeHolder}" ${required}></textarea>`
+
+    super(`
+      <div class="inputbox-group">
+        <label for="${name}">${label}${star}</label>
+        ${input}
+      </div>
+      `)
+
+    const textInput = this
+    textInput.inputElement = this.element.querySelector(`#${name}`);
+    textInput.label = label;
+  }
+
+  validate = () => {
+    if (!this.inputElement.checkValidity()) {
+      alert(`Please fill out all required fields.\n'${this.label}' is required.`);
+      this.inputElement.focus();
+      return false;
+    }
+    return true;
+  }
+}
+
+class CheckBoxInput extends BaseComponent{
+  constructor() {
+    super(`
+      <div class="checkbox-group">
+        <input type="checkbox" id="updates" name="updates">
+        <label for="updates">Yes, I would like to receive updates and other information from Conversion</label>
+      </div>
+    `)
+  }
+  validate = () => {
+    return true
+  }
+}
+
 
 class ProgressBar extends BaseComponent {
   constructor() {
