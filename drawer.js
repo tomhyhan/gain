@@ -138,14 +138,61 @@ const cssStrong = `
 }
 
 /* Slide */
+
+/* Slide Flip animation */
+/* Slide container*/ 
 .swiper-slide.drawer-slide {
+  background-color: transparent; 
+  padding: 0; 
+  perspective: 1000px; 
+}
+
+/* Slide card */
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+/* Slide flip State */
+.flip-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+/* Slide Cards Detail*/
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden; 
+
   background-color: var(--slide-bg-color); 
   border-radius: var(--border-radius-small);
   display: flex;
   flex-direction: column;
-  height: 100%;
   padding: var(--padding-medium); 
   gap: var(--flex-gap-medium);
+}
+
+/* Slide Flip */
+.flip-card-back {
+  transform: rotateY(180deg);
+  justify-content: space-between; 
+}
+
+.flip-card-back .drawer-slide__desc {
+  overflow: auto;
+  height: 100%;
+}
+
+.flip-btn--front,
+.flip-btn--back {
+  margin-top: auto;
+  align-self: flex-end;
 }
 
 .drawer-slide__info {
@@ -185,7 +232,7 @@ const cssStrong = `
   position: absolute;
   bottom: 130%; 
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(5px);
   background-color: black;
   color: white;
   padding: 3px 6px;
@@ -194,7 +241,7 @@ const cssStrong = `
   white-space: nowrap; 
   z-index: 10005;
 
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: all 0.3s ease-out
 }
 
 .drawer-slide__tooltip-text::after {
@@ -211,11 +258,12 @@ const cssStrong = `
 .drawer-slide__tooltip-wrapper:hover .drawer-slide__tooltip-text {
   visibility: visible;
   opacity: 1;
+  transform: translateX(-50%) translateY(0)
 }
 
 .drawer-slide__image-wrapper {
   width: 100%;
-  height: 35%;
+  height: 50%;
   flex-shrink: 0; 
 }
 
@@ -291,6 +339,11 @@ const cssStrong = `
   from {opacity: 1;}
   to {opacity: 0;}
 }
+
+
+
+
+
 `
 
 class App {
@@ -539,24 +592,69 @@ class DrawerContent extends BaseComponent {
   }
 }
 
+// class Slide extends BaseComponent {
+//   constructor(product) {
+//    super(`
+//       <li class="swiper-slide drawer-slide">
+//         <div class="drawer-slide__info">
+//           <h8 class="drawer-slide__header">${product.header}</h8>
+//           <div class="drawer-slide__tooltip-wrapper">
+//             <span class="drawer-slide__tooltip-icon">${tooltipIcon}</span>
+//             <span class="drawer-slide__tooltip-text">${product.tooltip}</span>
+//           </div>
+//         </div>
+//         <div class="drawer-slide__image-wrapper">
+//           <img class="drawer-slide__img" src="${product.image}" alt="${product.header}">
+//         </div>
+//         <p class="drawer-slide__desc">${product.description}</p>
+//         <button class="drawer-slide__btn">Learn more</button>
+//       </li>
+//     `) 
+//   }
+// }
+
 class Slide extends BaseComponent {
   constructor(product) {
-   super(`
+    super(`
       <li class="swiper-slide drawer-slide">
-        <div class="drawer-slide__info">
-          <h8 class="drawer-slide__header">${product.header}</h8>
-          <div class="drawer-slide__tooltip-wrapper">
-            <span class="drawer-slide__tooltip-icon">${tooltipIcon}</span>
-            <span class="drawer-slide__tooltip-text">${product.tooltip}</span>
+        <div class="flip-card-inner">
+          
+          <div class="flip-card-front">
+            <div class="drawer-slide__info">
+              <h8 class="drawer-slide__header">${product.header}</h8>
+              <div class="drawer-slide__tooltip-wrapper">
+                <span class="drawer-slide__tooltip-icon">${tooltipIcon}</span>
+                <span class="drawer-slide__tooltip-text">${product.tooltip}</span>
+              </div>
+            </div>
+            <div class="drawer-slide__image-wrapper">
+              <img class="drawer-slide__img" src="${product.image}" alt="${product.header}">
+            </div>
+            <button class="drawer-slide__btn flip-btn--front">Learn more</button>
           </div>
+
+          <div class="flip-card-back">
+            <div class="drawer-slide__info">
+              <h8 class="drawer-slide__header">${product.header}</h8>
+            </div>
+            <p class="drawer-slide__desc">${product.description}</p>
+            <button class="drawer-slide__btn flip-btn--back">Go Back</button>
+          </div>
+
         </div>
-        <div class="drawer-slide__image-wrapper">
-          <img class="drawer-slide__img" src="${product.image}" alt="${product.header}">
-        </div>
-        <p class="drawer-slide__desc">${product.description}</p>
-        <button class="drawer-slide__btn">Learn more</button>
       </li>
-    `) 
+    `);
+
+    const flipCardInner = this.element.querySelector('.flip-card-inner');
+    const frontBtn = this.element.querySelector('.flip-btn--front');
+    const backBtn = this.element.querySelector('.flip-btn--back');
+
+    const toggleFlip = () => {
+      flipCardInner.classList.toggle('is-flipped');
+    };
+
+    frontBtn.addEventListener('click', toggleFlip);
+    backBtn.addEventListener('click', toggleFlip);
   }
 }
 
