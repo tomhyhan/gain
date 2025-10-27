@@ -52,6 +52,7 @@
   border: var(--border-width) solid var(--button-bolder-color);
   outline: none;
 }
+
 /* From Trigger */
 
 .form-overlay {
@@ -86,7 +87,7 @@
 
 .formTrigger__p {
   color: gray;
-  margin-bottom: 3rem;
+  margin-bottom: 3rem
 }
 
 .formTrigger__btn {
@@ -103,9 +104,9 @@
   background-color: white;
   border-radius: 8px;
   z-index: 10003; /* Above form overlay */
-  width: 100%;
   max-width: 500px;
   animation: fadeIn 0.3s ease-out;
+  width: 100%;
 }
 
 .form-modal-container.remove {
@@ -152,15 +153,33 @@
 }
 
 /* The connecting line */
-.form-progress-step:not(:first-child)::before {
+.form-progress-step:not(:first-child)::before,
+.form-progress-step:not(:first-child)::after {
   content: '';
   position: absolute;
   top: 20px; 
   right: 50%;
   width: 100%; 
   height: 4px;
-  background-color: #ddd; /* Default inactive line */
-  z-index: 1; /* Behind the icon */
+}
+
+.form-progress-step:not(:first-child)::before {
+  background-color: var(--inactive); 
+  z-index: 1; 
+}
+
+.form-progress-step:not(:first-child)::after {
+  background-color: var(--progress-color);
+  z-index: 2; /* Above the gray ::before line */
+ 
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s ease-out;
+}
+
+.form-progress-step.active:not(:first-child)::after,
+.form-progress-step.completed:not(:first-child)::after {
+  transform: scaleX(1);
 }
 
 .form-progress-icon {
@@ -175,7 +194,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  z-index: 2; /* Above the line */
+  z-index: 3; /* Above the line */
   cursor: pointer;
 }
 
@@ -189,7 +208,7 @@
   background-color: #198754; 
   border-radius: 50%;
   border: 1px solid var(--inactive);
-  z-index: 3;
+  z-index: 4;
   align-items: center;
   justify-content: center;
 }
@@ -218,9 +237,7 @@
   border-color: var(--progress-color);
   color: white; 
 }
-.form-progress-step.completed::before, .form-progress-step.active::before{
-  background-color: var(--progress-color); 
-}
+
 .form-progress-step.completed .form-progress-badge {
   display: flex; 
 }

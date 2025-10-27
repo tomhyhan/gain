@@ -1,313 +1,3 @@
-const cssString = `
-/* todo: define color variables using root */
-:root {
-  /* colors */
-  --inactive: #ddd;
-  --progress-color: #568bda;
-  --button-color: #2d2d2d;
-  --button-bolder-color: #394e4b;
-
-  /* size */
-  --flex-small-gap: 5px;
-  --flex-middle-gap: 10px;
-  --border-width: 2px;
-
-}
-/* form button  */
-.form-btn {
-  cursor: pointer;
-  transition: all 0.1s linear;
-  border: var(--border-width) solid var(--button-bolder-color);
-  border-radius: 5px;
-  padding: 10px 15px;
-  cursor: pointer;
-  box-shadow: 0 var(--border-width) 0px 0px #3b3b3b;
-  background-color: var(--button-color);
-  color: white;
-  font-weight: bold;
-}
-
-.form-btn:hover {
-  filter: brightness(90%);
-}
-
-.form-btn:focus, 
-.form-btn:disabled, 
-.form-btn:active {
-  box-shadow: none;
-}
-
-.form-btn:focus {
-  outline: var(--border-width) solid white;
-  border: var(--border-width) solid blue;
-}
-
-.form-btn:disabled {
-  cursor: not-allowed;
-  border-color: var(--inactive);
-  color:var(--inactive);
-  background-color: #f5f5f5;
-}
-
-.form-btn:active {
-  filter: brightness(80%);
-  border: var(--border-width) solid var(--button-bolder-color);
-  outline: none;
-}
-
-/* From Trigger */
-
-.form-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0,0,0,0.4);
-  z-index: 10000; /* header is 9999 */
-
-  animation: fadeIn 0.3s ease-out
-}
-
-.form-overlay.remove {
-  animation: fadeOut 0.3s ease-in forwards;
-}
-
-.form-page {
-  max-width: 680px;
-  width: 100%;
-  padding: 3.5rem 2rem;
-  background-color: white;
-  position: relative;
-  z-index: 10001;
-}
-
-.formTrigger {
-  display: flex;
-  flex-direction: column;
-}
-
-.formTrigger__p {
-  color: gray;
-  margin-bottom: 3rem
-}
-
-.formTrigger__btn {
-  align-self: flex-end;
-}
-
-/* form modal container */
-.form-modal-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 2rem;
-  background-color: white;
-  border-radius: 8px;
-  z-index: 10003; /* Above form overlay */
-  max-width: 500px;
-  animation: fadeIn 0.3s ease-out;
-  width: 100%;
-}
-
-.form-modal-container.remove {
-  animation: fadeOut 0.3s ease-in forwards;
-}
-
-.form-modal__close {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 2rem;
-  font-weight: bold;
-  color: #888;
-  background: none;
-  border: none;
-  cursor: pointer;
-  line-height: 1;
-}
-
-/* form modal progress bar */
-
-.form-progress-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start; /* Aligns circles */
-  margin: 1rem;
-  padding-top: 1rem; 
-}
-
-.form-progress-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  flex-basis: 0; /* Distribute space evenly */
-  flex-grow: 1;
-  color: var(--progress-color);
-}
-
-.form-progress-step span {
-  font-size: 0.8rem;
-  margin-top: 10px;
-  text-align: center;
-}
-
-/* The connecting line */
-.form-progress-step:not(:first-child)::before {
-  content: '';
-  position: absolute;
-  top: 20px; 
-  right: 50%;
-  width: 100%; 
-  height: 4px;
-  background-color: #ddd; /* Default inactive line */
-  z-index: 1; /* Behind the icon */
-}
-
-.form-progress-icon {
-  width: 40px;
-  height: 40px;
-  padding: 3px;
-  border-radius: 50%;
-  background-color: white;
-  border: var(--border-width) solid var(--inactive); /* Default inactive border */
-  color: var(--progress-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 2; /* Above the line */
-  cursor: pointer;
-}
-
-.form-progress-badge {
-  display: none;
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 16px;
-  height: 16px;
-  background-color: #198754; 
-  border-radius: 50%;
-  border: 1px solid var(--inactive);
-  z-index: 3;
-  align-items: center;
-  justify-content: center;
-}
-
-.form-progress-badge::after {
-  content: '✔';
-  color: white;
-  font-size: 13px;
-  font-weight: bold;
-}
-
-/* Active Step */
-.form-progress-step.active {
-  color: var(--progress-color);
-  font-weight: bold;
-}
-.form-progress-step.active .form-progress-icon {
-  background-color: var(--progress-color);
-  border-color: var(--progress-color);
-  color: white;
-}
-
-/* Completed Step */
-.form-progress-step.completed .form-progress-icon {
-  background-color: var(--progress-color);
-  border-color: var(--progress-color);
-  color: white; 
-}
-.form-progress-step.completed::before, .form-progress-step.active::before{
-  background-color: var(--progress-color); 
-}
-.form-progress-step.completed .form-progress-badge {
-  display: flex; 
-}
-
-/* form modal */
-.form-modal {
-}
-
-.form-step {
-  display:flex;
-  flex-direction: column;
-  gap: var(--flex-middle-gap);
-}
-
-.form-step__name {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--flex-small-gap);
-}
-
-.form-step__buttons {
-  display: flex;
-  align-items: center;
-  justify-content: end;
-  gap: var(--flex-middle-gap)
-}
-
-
-.inputbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--flex-small-gap);
-}
-
-.inputbox-group__star {
-  color: red;
-}
-
-.form-modal__close:hover {
-  color: #000;
-}
-
-.inputbox-group input,
-.inputbox-group textarea {
-  padding: 9px 10px;
-  border: var(--border-width) solid var(--inactive);
-}
-
-.form-modal .checkbox-group {
-  display: flex;
-  align-items: center;
-  font-size: small;
-}
-
-.form-modal .checkbox-group input[type="checkbox"] {
-  appearance: auto;
-  -webkit-appearance: auto;
-  -moz-appearance: auto;
-  
-  width: auto;
-  margin-right: 8px;
-}
-
-/* animation */
-@keyframes fadeIn {
-  from {opacity: 0;}
-  to {opacity: 1;}
-}
-
-@keyframes fadeOut {
-  from {opacity: 1;}
-  to {opacity: 0;}
-}
-
-/* page break point: 768px */   
-@media (max-width: 768px) {
-  .form-step__name {
-    flex-direction: column;
-    align-items: start;
-  }
-}
-
-`
 class App {
   constructor(root) {
     const app = this; 
@@ -315,9 +5,6 @@ class App {
       throw new Error("root must not be null")
     }
     app.root = root;
-
-    // while developing
-    app.injectCSS()
 
     // remove all elements in form container
     app.root.innerHTML = ""; 
@@ -367,14 +54,6 @@ class App {
       });
     }
   }
-
-  injectCSS = () => {
-    const css = cssString;
-
-    const styleElement = document.createElement("style");
-    styleElement.innerHTML = css;
-    document.head.appendChild(styleElement);
-  }
 }
 
 class BaseComponent {
@@ -423,46 +102,7 @@ class FormTrigger extends BaseComponent {
     </section>`)
   }
 }
-//    <form class="form-modal">
-//           <div class="form-step" data-step="1">
-//             <div class="form-step__name">
-//               <div class="inputbox-group">
-//                 <label for="fname">First name<span class="inputbox-group__star">*</span></label>
-//                 <input type="text" id="fname" name="fname" placeholder="First name" required>
-//               </div>
-//               <div class="inputbox-group">
-//                 <label for="lname">Last name</label>
-//                 <input type="text" id="lname" name="lname" placeholder="Last name">
-//               </div>
-//             </div>
-//             <div class="inputbox-group">
-//               <label for="email">Work Email<span class="inputbox-group__star">*</span></label>
-//               <input type="email" id="email" name="email" required placeholder="Work Email">
-//             </div>
-//             <div class="form-step__buttons">
-//               <button type="button" class="form-btn modal-btn__next">Next</button>
-//             </div>
-//           </div>
-      
-//           <div class="form-step" data-step="2">
-//             <div class="inputbox-group">
-//               <label for="help">How can we help you?<span class="inputbox-group__star">*</span></label>
-//               <textarea id="help" name="help" rows="4" placeholder="Tell us more about how we can help" required></textarea>
-//             </div>
-//             <div class="checkbox-group">
-//               <input type="checkbox" id="updates" name="updates">
-//               <label for="updates">Yes, I would like to receive updates and other information from Conversion</label>
-//             </div>
-//             <div class="form-step__buttons">
-//               <button type="button" class="form-btn modal-btn__back">Back</button>
-//               <button type="submit" class="form-btn modal-btn__submit">Get In Touch</button>
-//             </div>
-//           </div>
-      
-//           <div class="form-step" data-step="3">
-//             <h4>Thank You!</h4>
-//           </div>
-//         </form>
+
 class Modal extends BaseComponent {
   constructor() {
     super(`
@@ -535,11 +175,11 @@ class Form extends BaseComponent {
     const step1 = new FormStep(1);
     
     const nameFields = new InputGroup('<div class="form-step__name"></div>');
-    nameFields.addInput(new TextInput("First name", "fname", "First name", true, "text", true));
-    nameFields.addInput(new TextInput("Last name", "lname", "Last name", false, "text", true));
+    nameFields.addInput(new TextInput("First name", "fname", "First name", true, "text"));
+    nameFields.addInput(new TextInput("Last name", "lname", "Last name", false, "text"));
 
     step1.addInput(nameFields);
-    step1.addInput(new TextInput("Work Email", "email", "Work Email", true, "email", true));
+    step1.addInput(new TextInput("Work Email", "email", "Work Email", true, "email"));
     step1.addButtons({ onNext: () => this.nextListener && this.nextListener()});
     
     const step2 = new FormStep(2);
@@ -648,12 +288,12 @@ class FormBtn extends BaseComponent {
 }
 
 class TextInput extends BaseComponent {
-  constructor(label, name, placeHolder, isRequired, type="text", isTextArea=false) {
+  constructor(label, name, placeHolder, isRequired, type="text", isInputText=true) {
     const required = isRequired? "required": ""
     const star = isRequired? `<span class="inputbox-group__star">*</span>`: ""
-    const input = isTextArea 
-      ?`<input type="${type}" id="${name}" name="${name}" placeholder="${placeHolder}" ${required}>`
-      : `<textarea id="help" name="help" rows="4" placeholder="${placeHolder}" ${required}></textarea>`
+    const input = isInputText 
+    ?`<input type="${type}" id="${name}" name="${name}" placeholder="${placeHolder}" ${required}>`
+    : `<textarea id="help" name="help" rows="4" placeholder="${placeHolder}" ${required}></textarea>`
 
     super(`
       <div class="inputbox-group">
