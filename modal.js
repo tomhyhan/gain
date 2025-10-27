@@ -349,7 +349,6 @@ class App {
       overlay.attachTo(document.body)
       overlay.putAboveFormTrigger()
 
-      modal.element.classList.remove("remove");
       modal.attachTo(document.body)
 
       const closeModalListner = () => {
@@ -387,6 +386,7 @@ class BaseComponent {
   }
 
   attachTo = (parent, position="afterbegin") => {
+    this.element.classList.remove("remove");
     parent.insertAdjacentElement(position, this.element);
   }
 
