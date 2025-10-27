@@ -291,10 +291,13 @@ class App {
       app.isDrawerOpen? app.closeDrawer(): app.openDrawer()
     });
 
+    // overlay listens to overlay click event
+    app.overlay.setOnCloseListener(app.closeDrawer)
+
     app.loadProducts(apiService);
   }
   
-  injectSwiper() {
+  injectSwiper = () => {
     // quick reference to css while in dev mode
     const css = cssStrong
 
@@ -319,7 +322,7 @@ class App {
     })
   }
 
-  async loadProducts(apiService) {
+  loadProducts = async (apiService) =>  {
     const products = await apiService.getProducts()
     products.forEach(product => {
       const slide = new Slide(product);
@@ -327,7 +330,7 @@ class App {
     })
   }
 
-  openDrawer() {
+  openDrawer = () => {
     const app = this;
     if (app.isDrawerOpen) return;
     app.isDrawerOpen = true;
@@ -336,7 +339,7 @@ class App {
     app.overlay.attachTo(app.root);
   }
 
-  closeDrawer() {
+  closeDrawer = () => {
     const app = this;
     if (!app.isDrawerOpen) return;
     app.isDrawerOpen = false;
@@ -400,7 +403,7 @@ class Drawer extends BaseComponent {
     this.onToggleListener = listener
   }
 
-  toggleIcon() {
+  toggleIcon = () => {
     const drawer = this;
     drawer.toggleBtn.classList.toggle('rotated')
     drawer.element.classList.toggle('is-open')
@@ -425,7 +428,7 @@ class DrawerContent extends BaseComponent {
     drawerContent.swiperInitialized = false;
   }
   
-  toggle() {
+  toggle = () => {
     const drawerContent = this;
     drawerContent.element.classList.toggle("drawer-content__hidden")
 
@@ -433,11 +436,11 @@ class DrawerContent extends BaseComponent {
     if (isOpen) drawerContent.initSwiper()
   }
 
-  addChild(child) {
+  addChild = (child) => {
     child.attachTo(this.swiperWrapper, "beforeend") 
   }
 
-  initSwiper() {
+  initSwiper = () => {
     const drawerContent = this;
 
     if (drawerContent.swiperInitialized) return;
@@ -490,16 +493,17 @@ class Overlay extends BaseComponent {
     overlay.element.addEventListener("click", () => overlay.closeListener && overlay.closeListener())
   }
 
-  setOnCloseListner(listener) {
+  setOnCloseListener = (listener) => {
+    console.log("listener", listener)
     this.closeListener = listener
   }
 
-  attachTo(parent, position = "afterbegin") {
+  attachTo = (parent, position = "afterbegin") => {
     this.element.classList.remove("remove");
     super.attachTo(parent, position);
   }
 
-  remove() {
+  remove = () => {
     const overlay = this;
     overlay.element.classList.add("remove")
     overlay.element.addEventListener("animationend", () => {
@@ -513,7 +517,7 @@ class ApiService {
     this.baseUrl = "https://dummyjson.com/";
   }
 
-  async getProducts(limit = 5) {
+  getProducts = async(limit = 5) => {
     const url = `${this.baseUrl}products?limit=${limit}`;
     try {
       const response = await fetch(url);
@@ -527,8 +531,7 @@ class ApiService {
     }
   }
 
-  normalizeProducts(products){
-    console.log(products, "products")
+  normalizeProducts = (products) => {
     return products.map(product => {
       return {
         header: product.title,
