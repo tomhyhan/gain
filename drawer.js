@@ -258,7 +258,7 @@ const cssStrong = `
 .drawer-slide__tooltip-wrapper:hover .drawer-slide__tooltip-text {
   visibility: visible;
   opacity: 1;
-  transform: translateX(-50%) translateY(0)
+  transform: translateX(-50%) translateY(0);
 }
 
 .drawer-slide__image-wrapper {
