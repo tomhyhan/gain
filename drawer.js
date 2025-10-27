@@ -6,11 +6,18 @@ const chevronIcon = `<svg
   fill="none" 
   stroke="currentColor" 
   stroke-width="2" 
-  stroke-linecap="round" 
+  // stroke-linecap="round" 
   stroke-linejoin="round"
 >
   <polyline points="18 15 12 9 6 15"></polyline>
 </svg>`
+
+const tooltipIcon =  `<svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none">
+<g id="SVGRepo_bgCarrier" stroke-width="0"/>
+<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="SVGRepo_iconCarrier"> <path d="M12 21C10.22 21 8.47991 20.4722 6.99987 19.4832C5.51983 18.4943 4.36628 17.0887 3.68509 15.4442C3.0039 13.7996 2.82567 11.99 3.17294 10.2442C3.5202 8.49836 4.37737 6.89472 5.63604 5.63604C6.89472 4.37737 8.49836 3.5202 10.2442 3.17294C11.99 2.82567 13.7996 3.0039 15.4442 3.68509C17.0887 4.36628 18.4943 5.51983 19.4832 6.99987C20.4722 8.47991 21 10.22 21 12C21 14.387 20.0518 16.6761 18.364 18.364C16.6761 20.0518 14.387 21 12 21ZM12 4.5C10.5166 4.5 9.0666 4.93987 7.83323 5.76398C6.59986 6.58809 5.63856 7.75943 5.07091 9.12988C4.50325 10.5003 4.35473 12.0083 4.64411 13.4632C4.9335 14.918 5.64781 16.2544 6.6967 17.3033C7.7456 18.3522 9.08197 19.0665 10.5368 19.3559C11.9917 19.6453 13.4997 19.4968 14.8701 18.9291C16.2406 18.3614 17.4119 17.4001 18.236 16.1668C19.0601 14.9334 19.5 13.4834 19.5 12C19.5 10.0109 18.7098 8.10323 17.3033 6.6967C15.8968 5.29018 13.9891 4.5 12 4.5Z" fill="#000000"/> <path d="M12 13C11.8019 12.9974 11.6126 12.9176 11.4725 12.7775C11.3324 12.6374 11.2526 12.4481 11.25 12.25V8.75C11.25 8.55109 11.329 8.36032 11.4697 8.21967C11.6103 8.07902 11.8011 8 12 8C12.1989 8 12.3897 8.07902 12.5303 8.21967C12.671 8.36032 12.75 8.55109 12.75 8.75V12.25C12.7474 12.4481 12.6676 12.6374 12.5275 12.7775C12.3874 12.9176 12.1981 12.9974 12 13Z" fill="#000000"/> <path d="M12 16C11.8019 15.9974 11.6126 15.9176 11.4725 15.7775C11.3324 15.6374 11.2526 15.4481 11.25 15.25V14.75C11.25 14.5511 11.329 14.3603 11.4697 14.2197C11.6103 14.079 11.8011 14 12 14C12.1989 14 12.3897 14.079 12.5303 14.2197C12.671 14.3603 12.75 14.5511 12.75 14.75V15.25C12.7474 15.4481 12.6676 15.6374 12.5275 15.7775C12.3874 15.9176 12.1981 15.9974 12 16Z" fill="#000000"/> </g>
+</svg>`
+
 const cssStrong = `
     :root {
   /* color */
@@ -21,6 +28,7 @@ const cssStrong = `
   --border-radius-small: 8px;
   --padding-small: 0.5rem;
   --padding-medium: 1rem;
+  --padding-large: 1.5rem;
   --flex-gap-small: 0.5rem;
   --flex-gap-medium: 1.0rem;
   --drawer-content-height: 50vh;
@@ -128,11 +136,12 @@ const cssStrong = `
   
 .swiper.drawer-content {
   height: var(--drawer-content-height);
-  padding: var(--padding-medium) 0;
+  padding: var(--padding-medium);
 }
 
 .drawer-page ul {
   margin: 0;
+  padding: 0;
 }
 
 .drawer-content__hidden {
@@ -147,14 +156,14 @@ const cssStrong = `
   flex-direction: column;
   height: 100%;
   padding: var(--padding-medium); 
-  gap: var(--flex-gap-medium)
+  gap: var(--flex-gap-medium);
 }
 
 .drawer-slide__info {
   display: flex;
-  align-items: center; 
   gap: var(--flex-gap-small);
   width: 100%;
+  align-items: center;
 }
 
 .drawer-slide__header {
@@ -167,14 +176,52 @@ const cssStrong = `
   text-overflow: ellipsis;
 }
 
-.drawer-slide__tooltip {
-  background-color: var(--drawer-page-color);
-  color: black;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: bold;
-  flex-shrink: 0; 
+.drawer-slide__tooltip-wrapper {
+  position: relative;
+  display: flex; 
+  align-items: center;
+}
+
+.drawer-slide__tooltip-icon {
+  cursor: help; 
+  font-size: medium;
+  display: flex;
+  align-items: center;
+}
+
+.drawer-slide__tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+
+  position: absolute;
+  bottom: 130%; 
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: black;
+  color: white;
+  padding: 3px 6px;
+  font-size: small;
+  border-radius: var(--border-radius-small);
+  white-space: nowrap; 
+  z-index: 10005;
+
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.drawer-slide__tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%; 
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.drawer-slide__tooltip-wrapper:hover .drawer-slide__tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
 
 .drawer-slide__image-wrapper {
@@ -186,7 +233,7 @@ const cssStrong = `
 .drawer-slide__img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
 }
 
 .drawer-slide__desc {
@@ -449,8 +496,7 @@ class DrawerContent extends BaseComponent {
     drawerContent.swiperLoadPromise
     .then(() => {
       drawerContent.swiper = new Swiper(drawerContent.swiperContainer, {
-        slidesPerView: 3,
-        spaceBetween:10,
+        grabCursor: true, 
         pagination : {
           el: ".swiper-pagination-drawer",
           type: "fraction"
@@ -458,7 +504,24 @@ class DrawerContent extends BaseComponent {
         navigation : {
           nextEl: ".swiper-button-next-drawer",
           prevEl: ".swiper-button-prev-drawer"
-        }
+        },
+        breakpoints: {
+            0: {
+              slidesPerView: 1,
+              slidesPerGroup:1,
+              spaceBetween: 10
+            },
+            768: {
+              slidesPerView: 2,
+              slidesPerGroup:2,
+              spaceBetween: 10
+            },
+            1024: {
+              slidesPerView: 4,
+              slidesPerGroup: 4,
+              spaceBetween: 10
+            }
+          }
       })
     })
     .catch(e => {
@@ -474,7 +537,10 @@ class Slide extends BaseComponent {
       <li class="swiper-slide drawer-slide">
         <div class="drawer-slide__info">
           <h8 class="drawer-slide__header">${product.header}</h8>
-          <span class="drawer-slide__tooltip">${product.tooltip}</span>
+          <div class="drawer-slide__tooltip-wrapper">
+            <span class="drawer-slide__tooltip-icon">${tooltipIcon}</span>
+            <span class="drawer-slide__tooltip-text">${product.tooltip}</span>
+          </div>
         </div>
         <div class="drawer-slide__image-wrapper">
           <img class="drawer-slide__img" src="${product.image}" alt="${product.header}">
@@ -517,7 +583,7 @@ class ApiService {
     this.baseUrl = "https://dummyjson.com/";
   }
 
-  getProducts = async(limit = 5) => {
+  getProducts = async(limit = 7) => {
     const url = `${this.baseUrl}products?limit=${limit}`;
     try {
       const response = await fetch(url);
