@@ -11,11 +11,11 @@ const chevronIcon = `<svg
 >
   <polyline points="18 15 12 9 6 15"></polyline>
 </svg>`
-// todo: disabled and color to white 
 const cssStrong = `
     :root {
   /* color */
   --drawer-page-color: #edbf60;
+  --slide-bg-color: #f0f0f0;
 
   /* size */
   --border-radius-small: 8px;
@@ -23,7 +23,7 @@ const cssStrong = `
   --padding-medium: 1rem;
   --flex-gap-small: 0.5rem;
   --flex-gap-medium: 1.0rem;
-  --drawer-content-height: 250px;
+  --drawer-content-height: 50vh;
 
   /* animation delay */
   --animation-delay: 0.3s;
@@ -31,13 +31,10 @@ const cssStrong = `
 
 /* drawer page layout */
 .drawer-page {
-  box-sizing: border-box;
   position: fixed;
   bottom: 0;
 
-  left: 0;
   width: 100%;
-
   z-index: 1000;
 }
 
@@ -128,9 +125,10 @@ const cssStrong = `
   background-color: white;
   max-height: var(--drawer-content-height);
 }
-
-.drawer-content {
-  height: 100%;
+  
+.swiper.drawer-content {
+  height: var(--drawer-content-height);
+  padding: var(--padding-medium) 0;
 }
 
 .drawer-page ul {
@@ -139,6 +137,101 @@ const cssStrong = `
 
 .drawer-content__hidden {
   max-height: 0;
+}
+
+/* Slide */
+.swiper-slide.drawer-slide {
+  background-color: var(--slide-bg-color); 
+  border-radius: var(--border-radius-small);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--padding-medium); 
+  gap: var(--flex-gap-medium)
+}
+
+.drawer-slide__info {
+  display: flex;
+  align-items: center; 
+  gap: var(--flex-gap-small);
+  width: 100%;
+}
+
+.drawer-slide__header {
+  font-weight: bold;
+  margin: 0;
+  
+  flex-shrink: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawer-slide__tooltip {
+  background-color: var(--drawer-page-color);
+  color: black;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0; 
+}
+
+.drawer-slide__image-wrapper {
+  width: 100%;
+  height: 35%;
+  flex-shrink: 0; 
+}
+
+.drawer-slide__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.drawer-slide__desc {
+  margin: 0;
+  font-size: small;
+
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.drawer-slide__btn {
+  margin-top:auto;
+  align-self: flex-end;
+  
+  border: none;
+  background-color: var(--drawer-page-color);
+  padding: var(--padding-small) var(--padding-medium);
+  border-radius: var(--border-radius-small);
+  cursor: pointer;
+  font-weight: bold;
+  font-size: medium;
+}
+
+.drawer-slide__btn:hover {
+  filter: brightness(0.95);
+}
+
+/* overlay */
+
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.4);
+  z-index: 10000; /* header is 9999 */
+
+  animation: fadeIn 0.3s ease-out
+}
+
+.drawer-overlay.remove {
+  animation: fadeOut 0.3s ease-in forwards;
 }
 
 /* animation */
@@ -151,6 +244,16 @@ const cssStrong = `
 .drawer.is-open,
 .drawer {
   transition: all var(--animation-delay) ease-in;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes fadeOut {
+  from {opacity: 1;}
+  to {opacity: 0;}
 }
 `
 
@@ -219,12 +322,6 @@ class App {
       const slide = new Slide(product);
       drawerContent.addChild(slide)
     })
-    // try {
-    //   await this.swiperLoadPromise;
-    //   drawerContent.initSwiper()
-    // } catch (e){
-    //   throw new Error(e)
-    // }
   }
 }
 
@@ -286,7 +383,7 @@ class DrawerContent extends BaseComponent {
   constructor(swiperLoadPromise) {
     super(`
       <div class="drawer-content-wrapper drawer-content__hidden">
-        <div class='drawer-content swiper'>
+        <div class='swiper drawer-content'>
           <ul class='swiper-wrapper'></ul>
         </div>
       </div>
@@ -343,15 +440,30 @@ class DrawerContent extends BaseComponent {
 class Slide extends BaseComponent {
   constructor(product) {
    super(`
-      <li class="drawer-slide swiper-slide">
-        <img class="drawer-slide__img" src="${product.image}" alt="${product.header}">
+      <li class="swiper-slide drawer-slide">
         <div class="drawer-slide__info">
-          <h4 class="drawer-slide__header">${product.header}</h4>
-          <p class="drawer-slide__desc">${product.description}</p>
+          <h8 class="drawer-slide__header">${product.header}</h8>
+          <span class="drawer-slide__tooltip">${product.tooltip}</span>
         </div>
-        <button class="drawer-slide__btn">view</button>
+        <div class="drawer-slide__image-wrapper">
+          <img class="drawer-slide__img" src="${product.image}" alt="${product.header}">
+        </div>
+        <p class="drawer-slide__desc">${product.description}</p>
+        <button class="drawer-slide__btn">Learn more</button>
       </li>
     `) 
+  }
+}
+
+class Overlay extends BaseComponent {
+  constructor() {
+    super("<div class='drawer-overlay'></div>")
+    const overlay = this;
+    overlay.element.addEventListener("click", () => overlay.closeListener && overlay.closeListener())
+  }
+
+  setOnCloseListner = (listener) => {
+    this.closeListener = listener
   }
 }
 
@@ -375,11 +487,13 @@ class ApiService {
   }
 
   normalizeProducts = (products) =>{
+    console.log(products, "products")
     return products.map(product => {
       return {
         header: product.title,
         description: product.description,
-        image: product. thumbnail,
+        image: product.thumbnail,
+        tooltip: product.category,
       }
     })
   }
