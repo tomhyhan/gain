@@ -385,23 +385,27 @@ class BaseComponent {
     this.element = template.content.firstElementChild;
   }
 
-  attachTo = (parent, position="afterbegin") => {
+  attachTo(parent, position="afterbegin") {
     this.element.classList.remove("remove");
     parent.insertAdjacentElement(position, this.element);
   }
 
-  removeFrom = (parent) => {
+  removeFrom(parent) {
     if (parent !== this.element.parentElement) {
       throw new Error("parent mismatch")
     }
     parent.removeChild(this.element)
   }
 
-  remove = () => {
+  remove() {
     this.element.classList.add("remove")
     this.element.addEventListener("animationend", () => {
       this.removeFrom(this.element.parentElement)
     }, {once:true})
+  }
+
+  addChild(child, position="beforeend") {
+    child.attachTo(this.element, position)
   }
 }
 
@@ -410,9 +414,6 @@ class PageComponent extends BaseComponent {
     super("<div class='form-page'></div>");
   }
 
-  addChild = (child) => {
-    child.attachTo(this.element, "beforeend")
-  }
 }
 
 class FormTrigger extends BaseComponent {
@@ -430,36 +431,6 @@ class Modal extends BaseComponent {
     super(`
       <div class="form-modal-container">
         <button class="form-modal__close" aria-label="Close modal">&times;</button>
-        
-        <div class="form-progress-bar">
-          <div class="form-progress-step" data-step="1">
-            <div class="form-progress-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A1.5 1.5 0 0 1 18 21.75H6a1.5 1.5 0 0 1-1.499-1.632Z" />
-              </svg>
-              <div class="form-progress-badge"></div>
-            </div>
-            <span>User Information</span>
-          </div>
-          <div class="form-progress-step" data-step="2">
-            <div class="form-progress-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-              </svg>
-              <div class="form-progress-badge"></div>
-            </div>
-            <span>Inquery</span>
-          </div>
-          <div class="form-progress-step" data-step="3">
-            <div class="form-progress-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L6 12Zm0 0h7.5" />
-              </svg>
-              <div class="form-progress-badge"></div>
-            </div>
-            <span>Complete</span>
-          </div>
-        </div>
 
         <form class="form-modal">
           <div class="form-step" data-step="1">
@@ -509,7 +480,10 @@ class Modal extends BaseComponent {
       currentStep: 1,
       maxStep:1
     };
-    
+
+    modal.progressbar = new ProgressBar()
+    modal.addChild(modal.progressbar, "afterbegin")
+
     modal.form = modal.element.querySelector(".form-modal");
     modal.steps = modal.element.querySelectorAll(".form-step");
     modal.progressSteps = modal.element.querySelectorAll(".form-progress-step");
@@ -538,20 +512,12 @@ class Modal extends BaseComponent {
   }
   
   render = () => {
-    const currentStepNum = this.state.currentStep;
+    const modal = this;
+    const currentStepNum = modal.state.currentStep;
 
-    this.steps.forEach(step => step.style.display = (step.dataset.step == currentStepNum) ? "flex" : "none");
+    modal.steps.forEach(step => step.style.display = (step.dataset.step == currentStepNum) ? "flex" : "none");
 
-    this.progressSteps.forEach((progressStep, index) => {
-      const step = index + 1;
-
-      progressStep.classList.remove('active', 'completed');
-      if (step < currentStepNum) {
-        progressStep.classList.add('completed'); 
-      } else if (step === currentStepNum) {
-        progressStep.classList.add('active'); 
-      } 
-    });
+    modal.progressbar.update(currentStepNum, modal.state.maxStep)
   }
 
   addEventListeners = () => {
@@ -567,13 +533,10 @@ class Modal extends BaseComponent {
       modal.goToStep(3);
     })
 
-    modal.progressSteps.forEach((progressStep, index) => {
-      progressStep.addEventListener('click', () => {
-        const targetStep = index + 1;
-        if (targetStep <= modal.state.maxStep) 
-          modal.goToStep(targetStep);
-      });
-    });
+    modal.progressbar.setOnStepClickListener((targetStep) => {
+      if (targetStep <= modal.state.maxStep) 
+        modal.goToStep(targetStep);
+    }) 
   }
 
   validateStep = (stepNum) => {
@@ -591,8 +554,80 @@ class Modal extends BaseComponent {
     }
     return allValid;
   }
-
 }
+
+class ProgressBar extends BaseComponent {
+  constructor() {
+    super(`<div class="form-progress-bar"></div>`)
+    const progressbar = this;
+    
+    progressbar.step1 = new ProgressStep(1, userIcon, "User Information")
+    progressbar.step2 = new ProgressStep(2, inqueryIcon, "Inquery")
+    progressbar.step3 = new ProgressStep(3, completeIcon, "Complete")
+
+    progressbar.steps = [progressbar.step1, progressbar.step2, progressbar.step3]
+    progressbar.steps.forEach(step => progressbar.addChild(step))
+    
+  }
+  
+  setOnStepClickListener(listener) {
+    this.steps.forEach(step => step.setOnStepClickListener(listener));
+  }
+
+  update = (currentStep, maxStep) => {
+    this.steps.forEach((step, idx) => {
+      const stepIdx = idx + 1;
+
+      if (stepIdx < currentStep) step.setCompleted();
+      else if (stepIdx === currentStep) step.setActive();
+      else step.setInactive();
+
+      step.setClickable(stepIdx <= maxStep);
+    })
+  }
+}
+
+class ProgressStep extends BaseComponent {
+  constructor(step, icon, text) {
+    super(`
+      <div class="form-progress-step" data-step=${step}>
+        <div class="form-progress-icon">
+          ${icon}
+          <div class="form-progress-badge"></div>
+        </div>
+        <span>${text}</span>
+      </div>
+    `)
+    const progressStep = this;
+    progressStep.icon = progressStep.element.querySelector(".form-progress-icon")
+    progressStep.element.addEventListener("click", () => {
+      progressStep.stepClickListener && progressStep.stepClickListener(step)
+    })
+  }
+
+  setOnStepClickListener(listener) {
+    this.stepClickListener = listener;
+  }
+
+  setActive = () => {
+    this.element.classList.add("active")
+    this.element.classList.remove("completed")
+  }
+
+  setCompleted = () => {
+    this.element.classList.add("completed")
+    this.element.classList.remove("active")
+  }
+
+  setInactive = () => {
+    this.element.classList.remove("active", "completed")
+  }
+
+  setClickable = (clickable) => {
+    this.icon.style.cursor = clickable? "pointer": "default"
+  }
+}
+
 
 class Overlay extends BaseComponent {
   constructor() {
@@ -613,6 +648,12 @@ class Overlay extends BaseComponent {
     this.element.style.zIndex = currentZNum + 2;
   }
 }
+
+const userIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A1.5 1.5 0 0 1 18 21.75H6a1.5 1.5 0 0 1-1.499-1.632Z" /></svg>`
+
+const inqueryIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>`
+
+const completeIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L6 12Zm0 0h7.5" /></svg>`
 
 const formContainer = document.querySelector(".contact-form__form");
 new App(formContainer)
