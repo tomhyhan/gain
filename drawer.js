@@ -399,7 +399,7 @@ class Drawer extends BaseComponent {
     });
   }
 
-  setOnToggleListener(listener) {
+  setOnToggleListener = (listener) => {
     this.onToggleListener = listener
   }
 

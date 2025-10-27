@@ -339,14 +339,8 @@ class App {
     const modal = new Modal()
 
     // clicking background removes overlay
-    // overlay knows nothing about click logic
     overlay.setOnCloseListner(() => {
-      overlay.element.classList.add("remove")
-      // animation time + buffer
-      setTimeout(() => {
-        overlay.removeFrom(document.body)
-      }, 350)
-    })
+      overlay.remove()});
 
     // clicking button opens a modal
     const formTriggerBtn = document.querySelector(".formTrigger__btn")
@@ -359,13 +353,8 @@ class App {
       modal.attachTo(document.body)
 
       const closeModalListner = () => {
-        overlay.element.classList.add("remove")
-        modal.element.classList.add("remove")
-        
-        setTimeout(() => {
-          overlay.removeFrom(document.body)
-          modal.removeFrom(document.body) 
-        }, 350)
+        overlay.remove()
+        modal.remove()
       }
 
       // reuse overlay with different close logic
@@ -406,6 +395,13 @@ class BaseComponent {
       throw new Error("parent mismatch")
     }
     parent.removeChild(this.element)
+  }
+
+  remove = () => {
+    this.element.classList.add("remove")
+    this.element.addEventListener("animationend", () => {
+      this.removeFrom(this.element.parentElement)
+    }, {once:true})
   }
 }
 
@@ -595,6 +591,7 @@ class Modal extends BaseComponent {
     }
     return allValid;
   }
+
 }
 
 class Overlay extends BaseComponent {
