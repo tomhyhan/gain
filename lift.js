@@ -1,78 +1,8 @@
-const cssString = `
-:root {
-  --text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
-}
-
-.lm-hero .lm-hero__left .lm-hero__header {
-  font-size: 2.8rem;
-  margin-bottom: 0.5rem;
-}
-
-.lm-hero .lm-hero__left .lm-hero__buttons .btn-video {
-  text-shadow: var(--text-shadow);
-  position: relative;
-  z-index: 1;
-}
-
-.hero-values {
-  list-style-type: none; 
-  position: relative;
-  z-index: 1;
-}
-
-.hero-values__item {
-  position: relative;     
-  padding-left: 30px;     
-  margin-bottom: 0.75rem; 
-  color: white;
-  text-shadow: var(--text-shadow);
-}
-
-/* use check mark intead */
-.hero-values__item::before {
-  content: ''; 
-  position: absolute;
-  left: 0;
-  top: 1px; 
-
-  width: 20px;
-  height: 20px;
-
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M866.133333 258.133333L362.666667 761.6l-204.8-204.8L98.133333 618.666667 362.666667 881.066667l563.2-563.2z' fill='%2343A047'/%3E%3C/svg%3E");
-}
-
-@media (max-width: 1100px) { 
-  .lm-hero .lm-hero__left .lm-hero__buttons {
-    flex-direction:row;
-    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
-    z-index:1
-  }
-}
-
-@media (max-width: 950px) { 
-  .lm-hero .lm-hero__left {
-    padding: 2rem 1rem;
-  }
-  .lm-hero .lm-hero__left .lm-hero__image {
-    height: 25vh;
-  }
-}
-
-@media (max-width: 480px) { 
-  .lm-hero .lm-hero__left .lm-hero__image {
-    height: 10vh;
-  }
-  .hero-values {
-    margin: 0;
-  }
-}
-`
 class App {
   constructor(hero, why) {
     const heroElement = new Hero(hero);
     const whyElement = new Why(why);
-    console.log("inited")
-    this.injectCSS()
+
     // deinfe ul component
     const values = new Values();
 
@@ -83,18 +13,11 @@ class App {
     values.addChild(new Value("Standing or scaling an experimentation program"))
     values.addChild(new Value("Advance customer research"))
 
+    // hero updates
     heroElement.updateTitle("We are the best experimentation agency in the world")
     heroElement.addValues(values)
     heroElement.updateButtonText("Contact us")
-    heroElement.onVideoClick(() => whyElement.scrollIntoView())
-  }
-
-  injectCSS = () => {
-    const css = cssString;
-
-    const styleElement = document.createElement("style");
-    styleElement.innerHTML = css;
-    document.head.appendChild(styleElement);
+    heroElement.setOnVideoClick(() => whyElement.scrollIntoView())
   }
 }
 
@@ -131,22 +54,18 @@ class Hero {
     values.attachTo(hero.h1, "afterend")
   }
 
-  onVideoClick = (listener) => {
+  setOnVideoClick = (listener) => {
     this.videoClickListener = listener
   }
 }
 
 class Why {
   constructor(whyElement) {
-    const why = this;
-    why.whyElement = whyElement
-
+    this.whyElement = whyElement
   }
 
   scrollIntoView = () => {
-    this.whyElement.scrollIntoView({
-      behavior: 'smooth'
-    });
+    this.whyElement.scrollIntoView({ behavior: 'smooth' });
   }
 }
 

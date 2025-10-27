@@ -1,5 +1,5 @@
 :root {
-
+  --text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
 }
 
 .lm-hero .lm-hero__left .lm-hero__header {
@@ -8,7 +8,7 @@
 }
 
 .lm-hero .lm-hero__left .lm-hero__buttons .btn-video {
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+  text-shadow: var(--text-shadow);
   position: relative;
   z-index: 1;
 }
@@ -24,29 +24,20 @@
   padding-left: 30px;     
   margin-bottom: 0.75rem; 
   color: white;
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+  text-shadow: var(--text-shadow);
 }
 
-/* 3. Create the checkmark icon */
+/* use check mark intead */
 .hero-values__item::before {
-  content: ''; /* This is required for ::before */
+  content: ''; 
   position: absolute;
   left: 0;
-  top: 4px; /* Fine-tune vertical alignment */
+  top: 1px; 
 
-  /* Icon size */
   width: 20px;
   height: 20px;
 
-  /* This is an "inline SVG" (as a Data URI). 
-    It's a green checkmark, so you don't need any image files.
-  */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%2328a745' viewBox='0 0 16 16'%3E%3Cpath d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
-  
-  /* Ensure the icon scales properly */
-  background-size: contain;
-  background-repeat: no-repeat;
-
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M866.133333 258.133333L362.666667 761.6l-204.8-204.8L98.133333 618.666667 362.666667 881.066667l563.2-563.2z' fill='%2343A047'/%3E%3C/svg%3E");
 }
 
 @media (max-width: 1100px) { 
@@ -54,5 +45,23 @@
     flex-direction:row;
     text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
     z-index:1
+  }
+}
+
+@media (max-width: 950px) { 
+  .lm-hero .lm-hero__left {
+    padding: 2rem 1rem;
+  }
+  .lm-hero .lm-hero__left .lm-hero__image {
+    height: 25vh;
+  }
+}
+
+@media (max-width: 480px) { 
+  .lm-hero .lm-hero__left .lm-hero__image {
+    height: 10vh;
+  }
+  .hero-values {
+    margin: 0;
   }
 }
