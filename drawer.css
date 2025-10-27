@@ -109,7 +109,7 @@
 
 .drawer .swiper-pagination-drawer {
   position: static;
-  fron-weight: bold;
+  font-weight: bold;
   font-size: small;
 }
 
@@ -273,11 +273,6 @@
 .drawer-slide__desc {
   margin: 0;
   font-size: small;
-
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
 }
 
 .drawer-slide__btn {
